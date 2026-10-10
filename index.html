@@ -270,6 +270,12 @@
       cursor: pointer;
     }
 
+    /* 原生下拉选项列表不继承页面配色，显式指定，避免深色模式下白底白字 */
+    .months-row select option {
+      background-color: var(--surface);
+      color: var(--ink);
+    }
+
     .cap-note {
       margin: 10px 0 0;
       font-size: .82rem;
