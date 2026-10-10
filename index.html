@@ -721,6 +721,17 @@
       cursor: not-allowed;
     }
 
+    .picker-hint {
+      display: none;
+      margin: 0;
+      padding: 2px 20px 14px;
+      color: var(--danger);
+      font-size: .82rem;
+      text-align: center;
+    }
+
+    .picker-hint.show { display: block; }
+
     .result-panel .step-button {
       border-color: var(--result-ink);
       background: var(--result-ink);
@@ -1123,6 +1134,7 @@
         <button class="picker-confirm" id="pickerConfirm" type="button">确定</button>
       </div>
       <div class="picker-wheels" id="pickerWheels"></div>
+      <p class="picker-hint" id="pickerHint" data-i18n="pickerPastHint">入境日期应为今天或未来时间，请重新选择。</p>
     </div>
   </div>
 
@@ -1190,7 +1202,8 @@
           dateD: '日',
           pickerTitle: '选择日期',
           pickerCancel: '取消',
-          pickerConfirm: '确定'
+          pickerConfirm: '确定',
+          pickerPastHint: '入境日期应为今天或未来时间，请重新选择。'
         },
         en: {
           docTitle: 'NZ Stay Days Calculator',
@@ -1248,7 +1261,8 @@
           dateD: 'Day',
           pickerTitle: 'Select date',
           pickerCancel: 'Cancel',
-          pickerConfirm: 'Done'
+          pickerConfirm: 'Done',
+          pickerPastHint: 'Entry date must be today or later. Please choose another date.'
         }
       };
 
@@ -1580,9 +1594,17 @@
       var pickerTitle = document.getElementById('pickerTitle');
       var pickerCancel = document.getElementById('pickerCancel');
       var pickerConfirm = document.getElementById('pickerConfirm');
+      var pickerHint = document.getElementById('pickerHint');
       var pickerTarget = null;
       var pickerSel = { y: 2000, m: 1, d: 1 };
       var pickerCloseTimer = null;
+
+      function todayLocalISO() {
+        var now = new Date();
+        return now.getFullYear() + '-' +
+          String(now.getMonth() + 1).padStart(2, '0') + '-' +
+          String(now.getDate()).padStart(2, '0');
+      }
 
       function getDateValue(fieldEl) {
         return fieldEl ? (fieldEl.getAttribute('data-value') || '') : '';
@@ -1724,6 +1746,7 @@
       function openDatePicker(fieldEl) {
         if (pickerCloseTimer) { clearTimeout(pickerCloseTimer); pickerCloseTimer = null; }
         pickerTarget = fieldEl;
+        pickerHint.classList.remove('show');
         var v = getDateValue(fieldEl);
         var now = new Date();
         var y = now.getFullYear();
@@ -1760,6 +1783,10 @@
         var returnTo = pickerTarget;
         if (save && pickerTarget) {
           var iso = pickerSel.y + '-' + String(pickerSel.m).padStart(2, '0') + '-' + String(pickerSel.d).padStart(2, '0');
+          if (pickerTarget === arrivalField && iso < todayLocalISO()) {
+            pickerHint.classList.add('show');
+            return;
+          }
           setDateValue(pickerTarget, iso);
         }
         pickerTarget = null;
@@ -1854,7 +1881,8 @@
       });
 
       toHistoryBtn.addEventListener('click', function () {
-        if (!getDateValue(arrivalField)) {
+        var v = getDateValue(arrivalField);
+        if (!v || v < todayLocalISO()) {
           arrivalField.classList.add('field-error');
           setTimeout(function () { arrivalField.classList.remove('field-error'); }, 1600);
           openDatePicker(arrivalField);
