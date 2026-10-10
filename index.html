@@ -423,6 +423,46 @@
     .method p { margin: 0; }
     .method strong { color: var(--ink); }
 
+    .mobile-progress,
+    .mobile-actions,
+    .trip-pager,
+    .mobile-step-note {
+      display: none;
+    }
+
+    .step-button {
+      min-height: 48px;
+      padding: 0 20px;
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-pill);
+      background: var(--ink);
+      color: var(--bg);
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .step-button.secondary {
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .result-panel .step-button {
+      border-color: var(--result-ink);
+      background: var(--result-ink);
+      color: var(--result-bg);
+    }
+
+    .result-panel .step-button.secondary {
+      background: transparent;
+      color: var(--result-ink);
+    }
+
+    .step-button:focus-visible,
+    .pager-button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+      outline-offset: 3px;
+    }
+
     @media (max-width: 840px) {
       .page { width: min(100% - 30px, 680px); padding-top: 30px; }
       .intro { grid-template-columns: 1fr; gap: 18px; margin-bottom: 26px; }
@@ -433,23 +473,189 @@
     }
 
     @media (max-width: 560px) {
-      .page { width: min(100% - 24px, 520px); padding: 24px 0 34px; }
-      h1 { font-size: clamp(2.25rem, 13vw, 3.55rem); }
-      .input-panel { padding: 18px 16px 22px; }
-      .trip {
-        grid-template-columns: 24px minmax(0, 1fr) auto;
-        gap: 9px 10px;
-        padding: 18px 0;
+      html, body { height: 100%; overflow: hidden; }
+      body { min-height: 100%; }
+
+      .page {
+        width: 100%;
+        height: 100dvh;
+        padding: 0;
+        overflow: hidden;
       }
-      .trip-number { grid-row: 1 / span 2; }
-      .trip .field { grid-column: 2; }
-      .trip .remove { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
-      .arrival-wrap { grid-template-columns: 1fr; gap: 18px; }
-      .result-panel { min-height: 410px; padding: 28px 24px 32px; }
-      .empty-state { min-height: 330px; }
-      .days { font-size: clamp(4.8rem, 25vw, 7rem); }
-      .deadline { font-size: clamp(2rem, 10vw, 3rem); }
-      .method { padding: 22px 4px; }
+
+      .intro, .method, .divider { display: none; }
+
+      .mobile-progress {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        height: 64px;
+        padding: max(10px, env(safe-area-inset-top)) 18px 8px;
+        border-bottom: 1px solid var(--line);
+        background: var(--bg);
+      }
+
+      .progress-item {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: .72rem;
+        font-weight: 700;
+      }
+
+      .progress-item::before {
+        content: attr(data-number);
+        display: grid;
+        place-items: center;
+        width: 18px;
+        height: 18px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: .65rem;
+      }
+
+      body[data-mobile-step="1"] .progress-item:nth-child(1),
+      body[data-mobile-step="2"] .progress-item:nth-child(2),
+      body[data-mobile-step="3"] .progress-item:nth-child(3) {
+        color: var(--ink);
+      }
+
+      body[data-mobile-step="1"] .progress-item:nth-child(1)::before,
+      body[data-mobile-step="2"] .progress-item:nth-child(2)::before,
+      body[data-mobile-step="3"] .progress-item:nth-child(3)::before {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: white;
+      }
+
+      .workspace {
+        display: block;
+        height: calc(100dvh - 64px);
+      }
+
+      .input-panel {
+        height: 100%;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: var(--surface);
+      }
+
+      .mobile-step {
+        display: none;
+        height: 100%;
+        padding: clamp(22px, 5vh, 38px) 20px max(18px, env(safe-area-inset-bottom));
+      }
+
+      .mobile-step.active {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mobile-step-note {
+        display: block;
+        margin: 8px 0 0;
+        color: var(--muted);
+        font-size: .86rem;
+        line-height: 1.55;
+      }
+
+      .arrival-wrap { display: block; }
+      .arrival-copy p { margin-top: 8px; }
+      .arrival-field { margin-top: clamp(28px, 7vh, 48px); }
+      .arrival-field input { min-height: 62px; font-size: 1.08rem; }
+      h2 { font-size: clamp(1.6rem, 7vw, 2.15rem); letter-spacing: -.045em; }
+
+      .mobile-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 18px;
+      }
+
+      .mobile-actions .step-button { flex: 1; }
+
+      .history-step .section-head { align-items: start; margin-bottom: 4px; }
+      .history-step .counter { margin-top: 8px; }
+      .trips { display: block; margin-top: clamp(16px, 4vh, 28px); }
+      .trip { display: none; }
+      .trip.active-trip {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px 10px;
+        padding: 0;
+        border: 0;
+      }
+      .trip-number { display: none; }
+      .trip .field { grid-column: 1 / -1; }
+      .trip .remove { grid-column: 2; grid-row: 3; min-height: 36px; }
+      .trip input[type="date"] { min-height: 50px; }
+
+      .trip-pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 38px;
+        margin-top: 4px;
+      }
+
+      .pager-button {
+        min-height: 36px;
+        padding: 0 4px;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .pager-button[disabled] { opacity: .3; cursor: default; }
+      .pager-position { color: var(--muted); font-family: "IBM Plex Mono", monospace; font-size: .75rem; }
+      .add { min-height: 40px; margin-top: 8px; font-size: .86rem; }
+      .messages { margin-top: 10px; padding: 9px 11px; font-size: .78rem; }
+
+      .result-panel {
+        display: none;
+        position: relative;
+        top: 0;
+        height: 100%;
+        min-height: 0;
+        padding: clamp(24px, 5vh, 36px) 22px max(18px, env(safe-area-inset-bottom));
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      body[data-mobile-step="3"] .input-panel { display: none; }
+      body[data-mobile-step="3"] .result-panel {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .result-panel::after { width: 170px; height: 170px; right: -60px; bottom: -70px; }
+      .empty-state { min-height: 0; flex: 1; }
+      .result-content.show { display: flex; flex-direction: column; flex: 1; }
+      .days-line { margin-top: clamp(16px, 3.5vh, 26px); }
+      .days { font-size: clamp(4.6rem, 24vw, 6.4rem); }
+      .deadline-block { margin-top: clamp(24px, 5vh, 38px); padding-top: 18px; }
+      .deadline { font-size: clamp(2rem, 10vw, 2.8rem); }
+      .result-meta { margin-top: clamp(20px, 4vh, 30px); }
+      .zero-note { margin-top: 14px; }
+      .result-panel .mobile-actions { position: relative; z-index: 1; }
+    }
+
+    @media (max-width: 560px) and (max-height: 680px) {
+      .mobile-progress { height: 56px; padding-top: 8px; }
+      .workspace { height: calc(100dvh - 56px); }
+      .mobile-step { padding-top: 18px; }
+      .arrival-field { margin-top: 22px; }
+      .trips { margin-top: 12px; }
+      .trip input[type="date"] { min-height: 44px; }
+      .deadline-block { margin-top: 18px; }
+      .result-meta { margin-top: 16px; }
+      .mobile-actions { padding-top: 10px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -457,37 +663,62 @@
     }
   </style>
 </head>
-<body>
+<body data-mobile-step="1">
   <main class="page">
     <header class="intro">
       <h1>如果这天来，<br>最多待到哪天？</h1>
       <p>加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。</p>
     </header>
 
+    <nav class="mobile-progress" aria-label="计算步骤">
+      <span class="progress-item" data-number="1">本次入境</span>
+      <span class="progress-item" data-number="2">过往行程</span>
+      <span class="progress-item" data-number="3">计算结果</span>
+    </nav>
+
     <div class="workspace">
       <section class="input-panel" aria-labelledby="arrival-title">
-        <div class="arrival-wrap">
-          <div class="arrival-copy">
-            <h2 id="arrival-title">本次行程哪天到？</h2>
-            <p>先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
+        <div class="mobile-step arrival-step active" data-step="1">
+          <div class="arrival-wrap">
+            <div class="arrival-copy">
+              <h2 id="arrival-title">本次行程哪天到？</h2>
+              <p>先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
+            </div>
+            <div class="field arrival-field">
+              <label for="arrival">计划入境日期</label>
+              <input id="arrival" type="date" autocomplete="off" />
+            </div>
           </div>
-          <div class="field arrival-field">
-            <label for="arrival">计划入境日期</label>
-            <input id="arrival" type="date" autocomplete="off" />
+          <div class="mobile-actions">
+            <button class="step-button" id="toHistory" type="button">下一步：过往行程</button>
           </div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="section-head">
-          <h2 id="history-title">以往的新西兰行程</h2>
-          <span class="counter" id="tripCounter">1 段</span>
+        <div class="mobile-step history-step" data-step="2">
+          <div class="section-head">
+            <div>
+              <h2 id="history-title">以前来过新西兰吗？</h2>
+              <p class="mobile-step-note">逐段填写；如果没有，直接查看结果。</p>
+            </div>
+            <span class="counter" id="tripCounter">1 段</span>
+          </div>
+
+          <div class="trips" id="trips" aria-live="polite"></div>
+          <div class="trip-pager" aria-label="切换历史行程">
+            <button class="pager-button" id="prevTrip" type="button">← 上一段</button>
+            <span class="pager-position" id="tripPosition">1 / 1</span>
+            <button class="pager-button" id="nextTrip" type="button">下一段 →</button>
+          </div>
+          <button class="add" id="addTrip" type="button"><span aria-hidden="true">＋</span> 增加一段行程</button>
+
+          <div class="messages" id="messages" role="alert"></div>
+          <div class="mobile-actions">
+            <button class="step-button secondary" id="backToArrival" type="button">上一步</button>
+            <button class="step-button" id="toResult" type="button">查看结果</button>
+          </div>
         </div>
-
-        <div class="trips" id="trips" aria-live="polite"></div>
-        <button class="add" id="addTrip" type="button"><span aria-hidden="true">＋</span> 增加一段行程</button>
-
-        <div class="messages" id="messages" role="alert"></div>
       </section>
 
       <aside class="result-panel" aria-live="polite" aria-atomic="true">
@@ -520,6 +751,10 @@
             </div>
           </div>
           <p class="zero-note" id="zeroNote">按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。</p>
+          <div class="mobile-actions">
+            <button class="step-button secondary" id="editHistory" type="button">修改行程</button>
+            <button class="step-button" id="startAgain" type="button">重算入境日</button>
+          </div>
         </div>
       </aside>
     </div>
@@ -547,6 +782,17 @@
       var historyUsedEl = document.getElementById('historyUsed');
       var currentUsedEl = document.getElementById('currentUsed');
       var zeroNote = document.getElementById('zeroNote');
+      var toHistoryBtn = document.getElementById('toHistory');
+      var backToArrivalBtn = document.getElementById('backToArrival');
+      var toResultBtn = document.getElementById('toResult');
+      var editHistoryBtn = document.getElementById('editHistory');
+      var startAgainBtn = document.getElementById('startAgain');
+      var prevTripBtn = document.getElementById('prevTrip');
+      var nextTripBtn = document.getElementById('nextTrip');
+      var tripPosition = document.getElementById('tripPosition');
+      var mobileSteps = Array.prototype.slice.call(document.querySelectorAll('.mobile-step'));
+      var mobileQuery = window.matchMedia('(max-width: 560px)');
+      var currentTripIndex = 0;
       var rowId = 0;
 
       function parseDate(value) {
@@ -576,6 +822,24 @@
         return date.getUTCFullYear() + '年' + (date.getUTCMonth() + 1) + '月' + date.getUTCDate() + '日';
       }
 
+      function setMobileStep(step) {
+        document.body.setAttribute('data-mobile-step', String(step));
+        mobileSteps.forEach(function (panel) {
+          panel.classList.toggle('active', Number(panel.dataset.step) === step);
+        });
+      }
+
+      function updateTripPager() {
+        var rows = Array.prototype.slice.call(tripsEl.querySelectorAll('.trip'));
+        currentTripIndex = Math.max(0, Math.min(currentTripIndex, rows.length - 1));
+        rows.forEach(function (row, index) {
+          row.classList.toggle('active-trip', index === currentTripIndex);
+        });
+        tripPosition.textContent = rows.length ? (currentTripIndex + 1) + ' / ' + rows.length : '0 / 0';
+        prevTripBtn.disabled = currentTripIndex <= 0;
+        nextTripBtn.disabled = currentTripIndex >= rows.length - 1;
+      }
+
       function addTrip(values) {
         rowId += 1;
         var row = document.createElement('div');
@@ -594,13 +858,19 @@
 
         row.addEventListener('input', calculate);
         row.querySelector('.remove').addEventListener('click', function () {
+          var rows = Array.prototype.slice.call(tripsEl.children);
+          var removedIndex = rows.indexOf(row);
           row.remove();
+          if (removedIndex <= currentTripIndex) currentTripIndex -= 1;
           if (!tripsEl.children.length) addTrip();
           renumber();
+          updateTripPager();
           calculate();
         });
         tripsEl.appendChild(row);
+        currentTripIndex = tripsEl.children.length - 1;
         renumber();
+        updateTripPager();
       }
 
       function renumber() {
@@ -732,9 +1002,61 @@
         var newest = tripsEl.lastElementChild;
         if (newest) newest.querySelector('.entry').focus();
       });
-      arrivalInput.addEventListener('input', calculate);
+
+      prevTripBtn.addEventListener('click', function () {
+        currentTripIndex -= 1;
+        updateTripPager();
+      });
+
+      nextTripBtn.addEventListener('click', function () {
+        currentTripIndex += 1;
+        updateTripPager();
+      });
+
+      toHistoryBtn.addEventListener('click', function () {
+        if (!arrivalInput.value) {
+          arrivalInput.setCustomValidity('请先选择计划入境日期');
+          arrivalInput.reportValidity();
+          arrivalInput.focus();
+          return;
+        }
+        arrivalInput.setCustomValidity('');
+        calculate();
+        setMobileStep(2);
+      });
+
+      backToArrivalBtn.addEventListener('click', function () {
+        setMobileStep(1);
+      });
+
+      toResultBtn.addEventListener('click', function () {
+        calculate();
+        if (messages.classList.contains('show')) return;
+        setMobileStep(3);
+      });
+
+      editHistoryBtn.addEventListener('click', function () {
+        setMobileStep(2);
+      });
+
+      startAgainBtn.addEventListener('click', function () {
+        setMobileStep(1);
+        arrivalInput.focus();
+      });
+
+      arrivalInput.addEventListener('input', function () {
+        arrivalInput.setCustomValidity('');
+        calculate();
+      });
+
+      if (mobileQuery.addEventListener) {
+        mobileQuery.addEventListener('change', function (event) {
+          if (event.matches) setMobileStep(Number(document.body.getAttribute('data-mobile-step')) || 1);
+        });
+      }
 
       addTrip();
+      setMobileStep(1);
       calculate();
     })();
   </script>
