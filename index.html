@@ -70,7 +70,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    button, input { font: inherit; }
+    button { font: inherit; }
 
     button { touch-action: manipulation; }
 
@@ -198,30 +198,186 @@
       min-width: 0;
     }
 
-    label {
+    label, .field-label {
       color: var(--muted);
       font-size: .82rem;
       font-weight: 600;
     }
 
-    input[type="date"] {
+    .date-field {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       width: 100%;
       min-width: 0;
+      max-width: 100%;
       min-height: 46px;
       padding: 10px 11px;
       border: 1px solid var(--line);
       border-radius: var(--radius-control);
       background: var(--bg);
       color: var(--ink);
-      outline: none;
       font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
       font-size: .9rem;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
       transition: border-color .18s ease, box-shadow .18s ease;
     }
 
-    input[type="date"]:focus-visible {
+    .date-field:hover { border-color: var(--muted); }
+
+    .date-field:focus-visible {
+      outline: none;
       border-color: var(--focus);
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent);
+    }
+
+    .date-field .date-display {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .date-field .date-placeholder { color: var(--muted); }
+    .date-field .date-value { color: var(--ink); }
+
+    .date-field .date-icon {
+      flex: none;
+      display: inline-flex;
+      color: var(--muted);
+    }
+
+    .date-field.field-error {
+      border-color: var(--danger);
+      animation: field-shake .3s ease;
+    }
+
+    @keyframes field-shake {
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
+    .picker-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      background: rgba(8, 12, 10, .5);
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+
+    .picker-overlay[hidden] { display: none; }
+    .picker-overlay.open { opacity: 1; }
+
+    .picker-sheet {
+      width: min(480px, 100%);
+      max-height: 82dvh;
+      overflow: hidden;
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: 20px 20px 0 0;
+      padding: 8px 20px max(20px, env(safe-area-inset-bottom));
+      box-shadow: 0 -14px 50px rgba(0, 0, 0, .28);
+      transform: translateY(28px);
+      transition: transform .22s ease;
+    }
+
+    .picker-overlay.open .picker-sheet { transform: none; }
+
+    @media (min-width: 561px) {
+      .picker-overlay { align-items: center; padding: 24px; }
+      .picker-sheet { border-radius: 20px; }
+    }
+
+    .picker-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0 2px;
+    }
+
+    .picker-title { font-weight: 700; font-size: .95rem; }
+
+    .picker-cancel,
+    .picker-confirm {
+      min-height: 42px;
+      padding: 0 10px;
+      border: 0;
+      background: transparent;
+      font-weight: 700;
+      font-size: .92rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .picker-cancel { color: var(--muted); }
+    .picker-confirm { color: var(--accent); }
+    .picker-cancel:hover, .picker-confirm:hover { opacity: .75; }
+
+    .picker-wheels {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .wheel-label {
+      margin-bottom: 2px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .wheel {
+      position: relative;
+      height: 220px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+      mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 80%, transparent);
+    }
+
+    .wheel::-webkit-scrollbar { display: none; }
+
+    .wheel-list { padding: 88px 0; }
+
+    .wheel-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      scroll-snap-align: center;
+      color: var(--muted);
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .wheel-item.selected {
+      color: var(--ink);
+      font-weight: 700;
+      font-size: 1.12rem;
+    }
+
+    .wheel-highlight {
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      top: 50%;
+      height: 44px;
+      transform: translateY(-50%);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      pointer-events: none;
     }
 
     .remove {
@@ -282,7 +438,7 @@
       line-height: 1.65;
     }
 
-    .arrival-field input {
+    .arrival-field .date-field {
       min-height: 56px;
       border-width: 2px;
       border-color: var(--accent);
@@ -681,15 +837,9 @@
       }
       .arrival-copy p { margin-top: 8px; }
       .arrival-field { margin-top: clamp(24px, 5.5vh, 40px); }
-      .arrival-field input {
-        display: block;
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
+      .arrival-field .date-field {
         min-height: 62px;
         font-size: 1rem;
-        -webkit-appearance: none;
-        appearance: none;
       }
       .rule-explainer {
         display: block;
@@ -734,15 +884,7 @@
       .trip-number { display: none; }
       .trip .field { grid-column: 1 / -1; }
       .trip .remove { grid-column: 2; grid-row: 3; min-height: 36px; }
-      .trip input[type="date"] {
-        display: block;
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        min-height: 50px;
-        -webkit-appearance: none;
-        appearance: none;
-      }
+      .trip .date-field { min-height: 50px; }
 
       .trip-pager {
         display: flex;
@@ -803,7 +945,7 @@
       .mobile-step { padding-top: 18px; }
       .arrival-field { margin-top: 22px; }
       .trips { margin-top: 12px; }
-      .trip input[type="date"] { min-height: 44px; }
+      .trip .date-field { min-height: 44px; }
       .deadline-block { margin-top: 18px; }
       .result-meta { margin-top: 16px; }
       .mobile-actions { padding-top: 10px; }
@@ -841,8 +983,8 @@
               <p data-i18n="arrivalHint">先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
             </div>
             <div class="field arrival-field">
-              <label for="arrival" data-i18n="arrivalLabel">计划入境日期</label>
-              <input id="arrival" type="date" autocomplete="off" />
+              <span class="field-label" id="arrivalLabel" data-i18n="arrivalLabel">计划入境日期</span>
+              <div class="date-field" id="arrival" data-value="" role="button" tabindex="0" aria-labelledby="arrivalLabel"></div>
             </div>
           </div>
           <div class="rule-explainer" aria-label="计算规则说明">
@@ -930,6 +1072,17 @@
     </footer>
   </main>
 
+  <div class="picker-overlay" id="pickerOverlay" hidden>
+    <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="pickerTitle">
+      <div class="picker-head">
+        <button class="picker-cancel" id="pickerCancel" type="button">取消</button>
+        <span class="picker-title" id="pickerTitle">选择日期</span>
+        <button class="picker-confirm" id="pickerConfirm" type="button">确定</button>
+      </div>
+      <div class="picker-wheels" id="pickerWheels"></div>
+    </div>
+  </div>
+
   <script>
     (function () {
       'use strict';
@@ -982,7 +1135,14 @@
           needBothDates: '历史行程需要同时填写入境和离境日期。',
           exitBeforeEntry: '行程的离境日期早于入境日期。',
           mustEndBeforeArrival: '历史行程必须在计划入境日前结束。',
-          pickArrivalFirst: '请先选择计划入境日期'
+          pickArrivalFirst: '请先选择计划入境日期',
+          datePlaceholder: '年 / 月 / 日',
+          dateY: '年',
+          dateM: '月',
+          dateD: '日',
+          pickerTitle: '选择日期',
+          pickerCancel: '取消',
+          pickerConfirm: '确定'
         },
         en: {
           docTitle: 'NZ Stay Days Calculator',
@@ -1028,7 +1188,14 @@
           needBothDates: ': please fill in both entry and exit dates.',
           exitBeforeEntry: ': exit date is before entry date.',
           mustEndBeforeArrival: ': past trips must end before the planned entry date.',
-          pickArrivalFirst: 'Please pick a planned entry date first'
+          pickArrivalFirst: 'Please pick a planned entry date first',
+          datePlaceholder: 'mm / dd / yyyy',
+          dateY: 'Year',
+          dateM: 'Month',
+          dateD: 'Day',
+          pickerTitle: 'Select date',
+          pickerCancel: 'Cancel',
+          pickerConfirm: 'Done'
         }
       };
 
@@ -1061,7 +1228,7 @@
       }
       var tripsEl = document.getElementById('trips');
       var addTripBtn = document.getElementById('addTrip');
-      var arrivalInput = document.getElementById('arrival');
+      var arrivalField = document.getElementById('arrival');
       var tripCounter = document.getElementById('tripCounter');
       var messages = document.getElementById('messages');
       var emptyState = document.getElementById('emptyState');
@@ -1123,8 +1290,8 @@
         try { localStorage.setItem('nzcalc-lang', lang); } catch (e) {}
         var target = htmlLang();
         document.documentElement.setAttribute('lang', target);
-        Array.prototype.forEach.call(document.querySelectorAll('input[type="date"]'), function (input) {
-          input.setAttribute('lang', target);
+        Array.prototype.forEach.call(document.querySelectorAll('.date-field'), function (fieldEl) {
+          renderDateField(fieldEl);
         });
         Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) {
           var value = I18N[lang][el.getAttribute('data-i18n')];
@@ -1186,16 +1353,18 @@
         row.dataset.id = String(rowId);
         row.innerHTML =
           '<span class="trip-number" aria-hidden="true"></span>' +
-          '<div class="field"><label class="entry-label" for="entry-' + rowId + '">' + t('entryDate') + '</label><input id="entry-' + rowId + '" class="entry" type="date" autocomplete="off" lang="' + htmlLang() + '"></div>' +
-          '<div class="field"><label class="exit-label" for="exit-' + rowId + '">' + t('exitDate') + '</label><input id="exit-' + rowId + '" class="exit" type="date" autocomplete="off" lang="' + htmlLang() + '"></div>' +
+          '<div class="field"><span class="field-label entry-label" id="entrylabel-' + rowId + '">' + t('entryDate') + '</span><div class="date-field entry" data-value="" role="button" tabindex="0" aria-labelledby="entrylabel-' + rowId + '"></div></div>' +
+          '<div class="field"><span class="field-label exit-label" id="exitlabel-' + rowId + '">' + t('exitDate') + '</span><div class="date-field exit" data-value="" role="button" tabindex="0" aria-labelledby="exitlabel-' + rowId + '"></div></div>' +
           '<button class="remove" type="button" aria-label="' + t('removeTripAria') + '">' + t('removeTrip') + '</button>';
 
+        initDateField(row.querySelector('.entry'), calculate);
+        initDateField(row.querySelector('.exit'), calculate);
+
         if (values) {
-          row.querySelector('.entry').value = values.entry || '';
-          row.querySelector('.exit').value = values.exit || '';
+          setDateValue(row.querySelector('.entry'), values.entry || '');
+          setDateValue(row.querySelector('.exit'), values.exit || '');
         }
 
-        row.addEventListener('input', calculate);
         row.querySelector('.remove').addEventListener('click', function () {
           var rows = Array.prototype.slice.call(tripsEl.children);
           var removedIndex = rows.indexOf(row);
@@ -1226,8 +1395,8 @@
         var errors = [];
 
         rows.forEach(function (row, index) {
-          var entryValue = row.querySelector('.entry').value;
-          var exitValue = row.querySelector('.exit').value;
+          var entryValue = getDateValue(row.querySelector('.entry'));
+          var exitValue = getDateValue(row.querySelector('.exit'));
           if (!entryValue && !exitValue) return;
           if (!entryValue || !exitValue) {
             errors.push(segName(index + 1) + t('needBothDates'));
@@ -1305,8 +1474,221 @@
         tripBreakdown.classList.add('show');
       }
 
+      /* ---------- custom date fields + wheel picker ---------- */
+      var CAL_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>';
+      var YEAR_MIN = 1990;
+      var YEAR_MAX = 2035;
+      var ITEM_H = 44;
+
+      var pickerOverlay = document.getElementById('pickerOverlay');
+      var pickerWheels = document.getElementById('pickerWheels');
+      var pickerTitle = document.getElementById('pickerTitle');
+      var pickerCancel = document.getElementById('pickerCancel');
+      var pickerConfirm = document.getElementById('pickerConfirm');
+      var pickerTarget = null;
+      var pickerSel = { y: 2000, m: 1, d: 1 };
+      var pickerCloseTimer = null;
+
+      function getDateValue(fieldEl) {
+        return fieldEl ? (fieldEl.getAttribute('data-value') || '') : '';
+      }
+
+      function daysInMonthUTC(y, m) {
+        return new Date(Date.UTC(y, m, 0)).getUTCDate();
+      }
+
+      function unitOrder() {
+        return lang === 'zh' ? ['y', 'm', 'd'] : ['m', 'd', 'y'];
+      }
+
+      function unitLabel(unit) {
+        if (unit === 'y') return t('dateY');
+        if (unit === 'm') return t('dateM');
+        return t('dateD');
+      }
+
+      function renderDateField(fieldEl) {
+        var display = fieldEl.querySelector('.date-display');
+        if (!display) return;
+        var v = getDateValue(fieldEl);
+        if (v) {
+          display.innerHTML = '<span class="date-value">' + formatDate(parseDate(v)) + '</span>';
+        } else {
+          display.innerHTML = '<span class="date-placeholder">' + t('datePlaceholder') + '</span>';
+        }
+      }
+
+      function setDateValue(fieldEl, iso) {
+        fieldEl.setAttribute('data-value', iso || '');
+        renderDateField(fieldEl);
+        if (typeof fieldEl._onChange === 'function') fieldEl._onChange();
+      }
+
+      function initDateField(fieldEl, onChange) {
+        fieldEl.innerHTML = '<span class="date-display"></span><span class="date-icon">' + CAL_ICON + '</span>';
+        fieldEl._onChange = onChange || null;
+        renderDateField(fieldEl);
+        fieldEl.addEventListener('click', function () { openDatePicker(fieldEl); });
+        fieldEl.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openDatePicker(fieldEl);
+          }
+        });
+      }
+
+      function wheelItems(unit) {
+        var items = [];
+        var i;
+        if (unit === 'y') {
+          for (i = YEAR_MIN; i <= YEAR_MAX; i++) items.push({ value: i, label: lang === 'zh' ? i + t('dateY') : String(i) });
+        } else if (unit === 'm') {
+          for (i = 1; i <= 12; i++) items.push({ value: i, label: lang === 'zh' ? i + t('dateM') : MONTHS_EN[i - 1] });
+        } else {
+          var dim = daysInMonthUTC(pickerSel.y, pickerSel.m);
+          for (i = 1; i <= dim; i++) items.push({ value: i, label: lang === 'zh' ? i + t('dateD') : String(i) });
+        }
+        return items;
+      }
+
+      function markSelected(col, selIdx) {
+        var nodes = col.querySelectorAll('.wheel-item');
+        Array.prototype.forEach.call(nodes, function (node, i) {
+          node.classList.toggle('selected', i === selIdx);
+        });
+      }
+
+      function fillWheel(col, selectedValue) {
+        var unit = col.getAttribute('data-unit');
+        var items = wheelItems(unit);
+        var wheel = col.querySelector('.wheel');
+        var list = col.querySelector('.wheel-list');
+        list.innerHTML = '';
+        var selIdx = 0;
+        items.forEach(function (item, i) {
+          if (item.value === selectedValue) selIdx = i;
+          var div = document.createElement('div');
+          div.className = 'wheel-item';
+          div.textContent = item.label;
+          div.addEventListener('click', function () {
+            wheel.scrollTo({ top: i * ITEM_H, behavior: 'smooth' });
+          });
+          list.appendChild(div);
+        });
+        col._items = items;
+        col._selIdx = selIdx;
+        markSelected(col, selIdx);
+      }
+
+      function onWheelSelect(col) {
+        var wheel = col.querySelector('.wheel');
+        var items = col._items || [];
+        if (!items.length) return;
+        var idx = Math.round(wheel.scrollTop / ITEM_H);
+        idx = Math.max(0, Math.min(items.length - 1, idx));
+        wheel.scrollTop = idx * ITEM_H;
+        markSelected(col, idx);
+        var unit = col.getAttribute('data-unit');
+        var value = items[idx].value;
+        if (unit === 'y') pickerSel.y = value;
+        else if (unit === 'm') pickerSel.m = value;
+        else pickerSel.d = value;
+        if (unit === 'y' || unit === 'm') {
+          var dim = daysInMonthUTC(pickerSel.y, pickerSel.m);
+          if (pickerSel.d > dim) pickerSel.d = dim;
+          var dayCol = pickerWheels.querySelector('[data-unit="d"]');
+          if (dayCol) {
+            fillWheel(dayCol, pickerSel.d);
+            dayCol.querySelector('.wheel').scrollTop = (dayCol._selIdx || 0) * ITEM_H;
+          }
+        }
+      }
+
+      function attachWheelScroll(col) {
+        var wheel = col.querySelector('.wheel');
+        var timer = null;
+        wheel.addEventListener('scroll', function () {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(function () { onWheelSelect(col); }, 100);
+        }, { passive: true });
+      }
+
+      function buildPickerColumns() {
+        pickerWheels.innerHTML = '';
+        unitOrder().forEach(function (unit) {
+          var col = document.createElement('div');
+          col.className = 'wheel-col';
+          col.setAttribute('data-unit', unit);
+          col.innerHTML = '<div class="wheel-label">' + unitLabel(unit) + '</div>' +
+            '<div class="wheel"><div class="wheel-list"></div><div class="wheel-highlight"></div></div>';
+          attachWheelScroll(col);
+          pickerWheels.appendChild(col);
+        });
+      }
+
+      function openDatePicker(fieldEl) {
+        if (pickerCloseTimer) { clearTimeout(pickerCloseTimer); pickerCloseTimer = null; }
+        pickerTarget = fieldEl;
+        var v = getDateValue(fieldEl);
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = now.getMonth() + 1;
+        var d = now.getDate();
+        if (v) {
+          var parsed = parseDate(v);
+          y = parsed.getUTCFullYear();
+          m = parsed.getUTCMonth() + 1;
+          d = parsed.getUTCDate();
+        }
+        y = Math.max(YEAR_MIN, Math.min(YEAR_MAX, y));
+        pickerSel = { y: y, m: m, d: Math.min(d, daysInMonthUTC(y, m)) };
+        pickerTitle.textContent = t('pickerTitle');
+        pickerCancel.textContent = t('pickerCancel');
+        pickerConfirm.textContent = t('pickerConfirm');
+        buildPickerColumns();
+        Array.prototype.forEach.call(pickerWheels.children, function (col) {
+          var unit = col.getAttribute('data-unit');
+          fillWheel(col, unit === 'y' ? pickerSel.y : unit === 'm' ? pickerSel.m : pickerSel.d);
+        });
+        pickerOverlay.hidden = false;
+        document.body.style.overflow = 'hidden';
+        Array.prototype.forEach.call(pickerWheels.children, function (col) {
+          col.querySelector('.wheel').scrollTop = (col._selIdx || 0) * ITEM_H;
+        });
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { pickerOverlay.classList.add('open'); });
+        });
+        pickerConfirm.focus();
+      }
+
+      function closeDatePicker(save) {
+        var returnTo = pickerTarget;
+        if (save && pickerTarget) {
+          var iso = pickerSel.y + '-' + String(pickerSel.m).padStart(2, '0') + '-' + String(pickerSel.d).padStart(2, '0');
+          setDateValue(pickerTarget, iso);
+        }
+        pickerTarget = null;
+        pickerOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+        if (returnTo) returnTo.focus();
+        if (pickerCloseTimer) clearTimeout(pickerCloseTimer);
+        pickerCloseTimer = setTimeout(function () {
+          pickerOverlay.hidden = true;
+          pickerCloseTimer = null;
+        }, 220);
+      }
+
+      pickerCancel.addEventListener('click', function () { closeDatePicker(false); });
+      pickerConfirm.addEventListener('click', function () { closeDatePicker(true); });
+      pickerOverlay.addEventListener('click', function (event) {
+        if (event.target === pickerOverlay) closeDatePicker(false);
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !pickerOverlay.hidden) closeDatePicker(false);
+      });
+
       function calculate() {
-        var arrival = parseDate(arrivalInput.value);
+        var arrival = parseDate(getDateValue(arrivalField));
         var collected = collectTrips(arrival);
         renderErrors(collected.errors);
 
@@ -1362,7 +1744,7 @@
       addTripBtn.addEventListener('click', function () {
         addTrip();
         var newest = tripsEl.lastElementChild;
-        if (newest) newest.querySelector('.entry').focus();
+        if (newest) openDatePicker(newest.querySelector('.entry'));
       });
 
       prevTripBtn.addEventListener('click', function () {
@@ -1376,13 +1758,12 @@
       });
 
       toHistoryBtn.addEventListener('click', function () {
-        if (!arrivalInput.value) {
-          arrivalInput.setCustomValidity(t('pickArrivalFirst'));
-          arrivalInput.reportValidity();
-          arrivalInput.focus();
+        if (!getDateValue(arrivalField)) {
+          arrivalField.classList.add('field-error');
+          setTimeout(function () { arrivalField.classList.remove('field-error'); }, 1600);
+          openDatePicker(arrivalField);
           return;
         }
-        arrivalInput.setCustomValidity('');
         calculate();
         setMobileStep(2);
       });
@@ -1403,13 +1784,10 @@
 
       startAgainBtn.addEventListener('click', function () {
         setMobileStep(1);
-        arrivalInput.focus();
+        openDatePicker(arrivalField);
       });
 
-      arrivalInput.addEventListener('input', function () {
-        arrivalInput.setCustomValidity('');
-        calculate();
-      });
+      initDateField(arrivalField, function () { calculate(); });
 
       if (mobileQuery.addEventListener) {
         mobileQuery.addEventListener('change', function (event) {
