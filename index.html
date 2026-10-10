@@ -258,7 +258,7 @@
       background: var(--bg);
     }
 
-    .months-row input {
+    .months-row select {
       flex: 1;
       min-width: 0;
       border: none;
@@ -267,16 +267,7 @@
       font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
       font-size: .95rem;
       outline: none;
-    }
-
-    .months-row input::placeholder { color: var(--muted); }
-
-    .months-row .months-unit {
-      flex: none;
-      padding-right: 6px;
-      color: var(--muted);
-      font-size: .85rem;
-      white-space: nowrap;
+      cursor: pointer;
     }
 
     .cap-note {
@@ -1076,10 +1067,17 @@
             <div class="field months-field">
               <span class="field-label" id="perEntryLabel" data-i18n="perEntryLabel">单次最长停留</span>
               <div class="months-row">
-                <input type="number" id="perEntryMonths" min="1" max="36" step="1" inputmode="numeric" placeholder="例如 3" aria-labelledby="perEntryLabel">
-                <span class="months-unit" data-i18n="monthUnit">个月</span>
+                <select id="perEntryMonths" aria-labelledby="perEntryLabel">
+                  <option value="" data-i18n="perEntryNone">不填</option>
+                  <option value="1" data-i18n="month1">1 个月</option>
+                  <option value="2" data-i18n="month2">2 个月</option>
+                  <option value="3" data-i18n="month3">3 个月</option>
+                  <option value="4" data-i18n="month4">4 个月</option>
+                  <option value="5" data-i18n="month5">5 个月</option>
+                  <option value="6" data-i18n="month6">6 个月</option>
+                </select>
               </div>
-              <p class="hint" data-i18n="perEntryHint">按你的签证条件填写；不填则只按 12 个月规则计算。</p>
+              <p class="hint" data-i18n="perEntryHint">按你的签证条件选择；不填则只按 12 个月规则计算。</p>
             </div>
           </div>
           <div class="rule-explainer" aria-label="计算规则说明">
@@ -1210,9 +1208,14 @@
           arrivalHint: '先选择计划入境日期。入境当天和离境当天都计入停留天数。',
           arrivalLabel: '计划入境日期',
           perEntryLabel: '单次最长停留',
-          monthUnit: '个月',
-          perEntryPh: '例如 3',
-          perEntryHint: '按你的签证条件填写；不填则只按 12 个月规则计算。',
+          perEntryNone: '不填',
+          month1: '1 个月',
+          month2: '2 个月',
+          month3: '3 个月',
+          month4: '4 个月',
+          month5: '5 个月',
+          month6: '6 个月',
+          perEntryHint: '按你的签证条件选择；不填则只按 12 个月规则计算。',
           ruleTitle: '怎么计算？',
           ruleText: '官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。',
           toHistory: '下一步：过往行程',
@@ -1273,9 +1276,14 @@
           arrivalHint: 'Pick your planned entry date first. Both the entry day and the exit day count toward your stay.',
           arrivalLabel: 'Planned entry date',
           perEntryLabel: 'Max stay per visit',
-          monthUnit: 'months',
-          perEntryPh: 'e.g. 3',
-          perEntryHint: 'Fill in per your visa conditions; leave blank to use only the 12-month rule.',
+          perEntryNone: 'Not set',
+          month1: '1 month',
+          month2: '2 months',
+          month3: '3 months',
+          month4: '4 months',
+          month5: '5 months',
+          month6: '6 months',
+          perEntryHint: 'Select per your visa conditions; leave blank to use only the 12-month rule.',
           ruleTitle: 'How is it calculated?',
           ruleText: 'The official rule caps total stay at 6 months in any 12-month period; this calculator uses a conservative 180-day cap. Add your past trips next and we’ll work out how long you can stay.',
           toHistory: 'Next: past trips',
@@ -1366,7 +1374,7 @@
 
       function readPerEntryMonths() {
         var v = parseInt(perEntryMonthsEl.value, 10);
-        if (!isFinite(v) || v < 1 || v > 36) return null;
+        if (!isFinite(v) || v < 1 || v > 6) return null;
         return v;
       }
 
@@ -1460,7 +1468,6 @@
           var value = I18N[lang][el.getAttribute('data-i18n-aria')];
           if (value != null) el.setAttribute('aria-label', value);
         });
-        if (perEntryMonthsEl) perEntryMonthsEl.placeholder = t('perEntryPh');
         Array.prototype.forEach.call(document.querySelectorAll('.lang-toggle'), function (btn) {
           btn.textContent = lang === 'zh' ? 'EN' : '中文';
         });
@@ -2014,7 +2021,7 @@
       });
 
       initDateField(arrivalField, function () { calculate(); });
-      perEntryMonthsEl.addEventListener('input', function () { calculate(); });
+      perEntryMonthsEl.addEventListener('change', function () { calculate(); });
 
       if (mobileQuery.addEventListener) {
         mobileQuery.addEventListener('change', function (event) {
