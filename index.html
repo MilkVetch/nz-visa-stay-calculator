@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f2f3ef" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#111412" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" href="data:," />
+  <title>新西兰停留天数计算器</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap');
+
+    :root {
+      color-scheme: light dark;
+      --bg: #f2f3ef;
+      --surface: #fafbf8;
+      --surface-strong: #e8eae4;
+      --ink: #17201c;
+      --muted: #59635e;
+      --line: #cfd4cd;
+      --accent: #c94427;
+      --accent-hover: #ae351c;
+      --accent-soft: #f3ddd6;
+      --accent-ink: #7c2412;
+      --result-bg: #1d211f;
+      --result-ink: #f6f7f3;
+      --result-muted: #b8beb9;
+      --danger: #b42318;
+      --danger-soft: #fde9e6;
+      --focus: #2f6d5c;
+      --shadow: 0 20px 60px rgba(30, 40, 35, .11);
+      --radius-panel: 20px;
+      --radius-control: 10px;
+      --radius-pill: 999px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111412;
+        --surface: #191d1a;
+        --surface-strong: #242a26;
+        --ink: #f0f3ee;
+        --muted: #aeb7b0;
+        --line: #39413b;
+        --accent: #f06a4c;
+        --accent-hover: #ff8064;
+        --accent-soft: #4a241b;
+        --accent-ink: #ffb4a1;
+        --result-bg: #edf0eb;
+        --result-ink: #171b18;
+        --result-muted: #5a635d;
+        --danger: #ff8a7a;
+        --danger-soft: #401f1c;
+        --focus: #78bca8;
+        --shadow: 0 22px 70px rgba(0, 0, 0, .3);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-width: 320px; }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Noto Sans SC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+
+    button { touch-action: manipulation; }
+
+    .page {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 54px 0 48px;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+      gap: 36px;
+      align-items: end;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 720px;
+      font-size: clamp(2.35rem, 6vw, 5.2rem);
+      line-height: .98;
+      letter-spacing: -.065em;
+      font-weight: 800;
+    }
+
+    .intro p {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.75;
+      max-width: 38ch;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .input-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-panel);
+      padding: clamp(20px, 3.5vw, 36px);
+      box-shadow: var(--shadow);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      line-height: 1.3;
+      letter-spacing: -.02em;
+    }
+
+    .counter {
+      color: var(--muted);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .78rem;
+      white-space: nowrap;
+    }
+
+    .trips {
+      display: grid;
+      gap: 10px;
+    }
+
+    .trip {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .trip:first-child { border-top: 0; padding-top: 0; }
+
+    .trip-number {
+      align-self: center;
+      color: var(--muted);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .75rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 600;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      min-width: 0;
+      min-height: 46px;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-control);
+      background: var(--bg);
+      color: var(--ink);
+      outline: none;
+      font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
+      font-size: .9rem;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    input[type="date"]:focus-visible {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent);
+    }
+
+    .remove {
+      min-height: 42px;
+      padding: 0 4px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: .82rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .remove:hover { color: var(--danger); }
+    .remove:focus-visible, .add:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 30%, transparent);
+      outline-offset: 3px;
+    }
+
+    .add {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      margin-top: 12px;
+      padding: 0 16px;
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--ink);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease, transform .12s ease;
+    }
+
+    .add:hover { background: var(--ink); color: var(--bg); }
+    .add:active { transform: translateY(1px); }
+
+    .divider {
+      height: 1px;
+      margin: 30px 0;
+      background: var(--line);
+    }
+
+    .arrival-wrap {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .75fr);
+      gap: 28px;
+      align-items: end;
+    }
+
+    .arrival-copy p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.65;
+    }
+
+    .arrival-field input {
+      min-height: 56px;
+      border-width: 2px;
+      border-color: var(--accent);
+      background: var(--surface);
+      font-size: 1rem;
+    }
+
+    .messages {
+      display: none;
+      margin-top: 20px;
+      padding: 12px 14px;
+      border-radius: var(--radius-control);
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: .86rem;
+      line-height: 1.55;
+    }
+
+    .messages.show { display: block; }
+
+    .result-panel {
+      position: sticky;
+      top: 22px;
+      overflow: hidden;
+      min-height: 520px;
+      padding: clamp(24px, 4vw, 42px);
+      border-radius: var(--radius-panel);
+      background: var(--result-bg);
+      color: var(--result-ink);
+      box-shadow: var(--shadow);
+    }
+
+    .result-panel::after {
+      content: "";
+      position: absolute;
+      right: -65px;
+      bottom: -75px;
+      width: 220px;
+      height: 220px;
+      border: 35px solid var(--accent);
+      border-radius: 50%;
+      opacity: .15;
+      pointer-events: none;
+    }
+
+    .result-label {
+      margin: 0;
+      color: var(--result-muted);
+      font-size: .92rem;
+      font-weight: 600;
+    }
+
+    .empty-state {
+      min-height: 390px;
+      display: grid;
+      align-content: center;
+      gap: 12px;
+    }
+
+    .empty-state strong {
+      display: block;
+      max-width: 9ch;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+    }
+
+    .empty-state span {
+      color: var(--result-muted);
+      font-size: .9rem;
+    }
+
+    .result-content { display: none; }
+    .result-content.show { display: block; }
+    .empty-state.hidden { display: none; }
+
+    .days-line {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 26px;
+    }
+
+    .days {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: clamp(5rem, 12vw, 8.2rem);
+      line-height: .8;
+      letter-spacing: -.085em;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .days-unit {
+      font-size: clamp(1.15rem, 2vw, 1.5rem);
+      font-weight: 700;
+    }
+
+    .deadline-block {
+      margin-top: 42px;
+      padding-top: 24px;
+      border-top: 1px solid color-mix(in srgb, var(--result-ink) 22%, transparent);
+    }
+
+    .deadline-label {
+      color: var(--result-muted);
+      font-size: .85rem;
+    }
+
+    .deadline {
+      display: block;
+      margin-top: 8px;
+      font-size: clamp(2rem, 5vw, 3.7rem);
+      line-height: 1.08;
+      letter-spacing: -.045em;
+      font-weight: 800;
+    }
+
+    .result-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 34px;
+    }
+
+    .meta-item {
+      padding-top: 14px;
+      border-top: 1px solid color-mix(in srgb, var(--result-ink) 15%, transparent);
+    }
+
+    .meta-item span {
+      display: block;
+      color: var(--result-muted);
+      font-size: .75rem;
+    }
+
+    .meta-item strong {
+      display: block;
+      margin-top: 5px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: .96rem;
+    }
+
+    .zero-note {
+      display: none;
+      margin-top: 22px;
+      color: var(--result-muted);
+      line-height: 1.6;
+      font-size: .86rem;
+    }
+
+    .zero-note.show { display: block; }
+
+    .method {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 22px;
+      padding: 26px 28px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+      line-height: 1.75;
+    }
+
+    .method p { margin: 0; }
+    .method strong { color: var(--ink); }
+
+    @media (max-width: 840px) {
+      .page { width: min(100% - 30px, 680px); padding-top: 30px; }
+      .intro { grid-template-columns: 1fr; gap: 18px; margin-bottom: 26px; }
+      .intro p { max-width: 54ch; }
+      .workspace { grid-template-columns: 1fr; }
+      .result-panel { position: relative; top: 0; min-height: 430px; }
+      .method { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .page { width: min(100% - 24px, 520px); padding: 24px 0 34px; }
+      h1 { font-size: clamp(2.25rem, 13vw, 3.55rem); }
+      .input-panel { padding: 18px 16px 22px; }
+      .trip {
+        grid-template-columns: 24px minmax(0, 1fr) auto;
+        gap: 9px 10px;
+        padding: 18px 0;
+      }
+      .trip-number { grid-row: 1 / span 2; }
+      .trip .field { grid-column: 2; }
+      .trip .remove { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+      .arrival-wrap { grid-template-columns: 1fr; gap: 18px; }
+      .result-panel { min-height: 410px; padding: 28px 24px 32px; }
+      .empty-state { min-height: 330px; }
+      .days { font-size: clamp(4.8rem, 25vw, 7rem); }
+      .deadline { font-size: clamp(2rem, 10vw, 3rem); }
+      .method { padding: 22px 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="intro">
+      <h1>如果这天来，<br>最多待到哪天？</h1>
+      <p>加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。</p>
+    </header>
+
+    <div class="workspace">
+      <section class="input-panel" aria-labelledby="arrival-title">
+        <div class="arrival-wrap">
+          <div class="arrival-copy">
+            <h2 id="arrival-title">本次行程哪天到？</h2>
+            <p>先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
+          </div>
+          <div class="field arrival-field">
+            <label for="arrival">计划入境日期</label>
+            <input id="arrival" type="date" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section-head">
+          <h2 id="history-title">以往的新西兰行程</h2>
+          <span class="counter" id="tripCounter">1 段</span>
+        </div>
+
+        <div class="trips" id="trips" aria-live="polite"></div>
+        <button class="add" id="addTrip" type="button"><span aria-hidden="true">＋</span> 增加一段行程</button>
+
+        <div class="messages" id="messages" role="alert"></div>
+      </section>
+
+      <aside class="result-panel" aria-live="polite" aria-atomic="true">
+        <div class="empty-state" id="emptyState">
+          <p class="result-label">计算结果</p>
+          <strong>先选择计划入境日期</strong>
+          <span>过去没有行程也可以直接计算</span>
+        </div>
+
+        <div class="result-content" id="resultContent">
+          <p class="result-label">本次最多还可以停留</p>
+          <div class="days-line">
+            <strong class="days" id="days">180</strong>
+            <span class="days-unit">天</span>
+          </div>
+
+          <div class="deadline-block">
+            <span class="deadline-label">最晚应在这天离境</span>
+            <strong class="deadline" id="deadline">—</strong>
+          </div>
+
+          <div class="result-meta">
+            <div class="meta-item">
+              <span>历史停留计入</span>
+              <strong id="historyUsed">0 天</strong>
+            </div>
+            <div class="meta-item">
+              <span>本次停留</span>
+              <strong id="currentUsed">180 天</strong>
+            </div>
+          </div>
+          <p class="zero-note" id="zeroNote">按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="method">
+      <p><strong>计算口径：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。</p>
+      <p><strong>请注意：</strong>这是用于规划的保守估算，不替代签证条件、移民局解释或入境时作出的决定。</p>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var DAY = 86400000;
+      var tripsEl = document.getElementById('trips');
+      var addTripBtn = document.getElementById('addTrip');
+      var arrivalInput = document.getElementById('arrival');
+      var tripCounter = document.getElementById('tripCounter');
+      var messages = document.getElementById('messages');
+      var emptyState = document.getElementById('emptyState');
+      var resultContent = document.getElementById('resultContent');
+      var daysEl = document.getElementById('days');
+      var deadlineEl = document.getElementById('deadline');
+      var historyUsedEl = document.getElementById('historyUsed');
+      var currentUsedEl = document.getElementById('currentUsed');
+      var zeroNote = document.getElementById('zeroNote');
+      var rowId = 0;
+
+      function parseDate(value) {
+        if (!value) return null;
+        var parts = value.split('-').map(Number);
+        return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      }
+
+      function addDays(date, amount) {
+        return new Date(date.getTime() + amount * DAY);
+      }
+
+      function dayDiff(start, end) {
+        return Math.round((end.getTime() - start.getTime()) / DAY);
+      }
+
+      function subtractCalendarMonths(date, amount) {
+        var targetYear = date.getUTCFullYear();
+        var targetMonth = date.getUTCMonth() - amount;
+        targetYear += Math.floor(targetMonth / 12);
+        targetMonth = ((targetMonth % 12) + 12) % 12;
+        var lastDay = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
+        return new Date(Date.UTC(targetYear, targetMonth, Math.min(date.getUTCDate(), lastDay)));
+      }
+
+      function formatDate(date) {
+        return date.getUTCFullYear() + '年' + (date.getUTCMonth() + 1) + '月' + date.getUTCDate() + '日';
+      }
+
+      function addTrip(values) {
+        rowId += 1;
+        var row = document.createElement('div');
+        row.className = 'trip';
+        row.dataset.id = String(rowId);
+        row.innerHTML =
+          '<span class="trip-number" aria-hidden="true"></span>' +
+          '<div class="field"><label for="entry-' + rowId + '">入境日期</label><input id="entry-' + rowId + '" class="entry" type="date" autocomplete="off"></div>' +
+          '<div class="field"><label for="exit-' + rowId + '">离境日期</label><input id="exit-' + rowId + '" class="exit" type="date" autocomplete="off"></div>' +
+          '<button class="remove" type="button" aria-label="删除这段行程">删除</button>';
+
+        if (values) {
+          row.querySelector('.entry').value = values.entry || '';
+          row.querySelector('.exit').value = values.exit || '';
+        }
+
+        row.addEventListener('input', calculate);
+        row.querySelector('.remove').addEventListener('click', function () {
+          row.remove();
+          if (!tripsEl.children.length) addTrip();
+          renumber();
+          calculate();
+        });
+        tripsEl.appendChild(row);
+        renumber();
+      }
+
+      function renumber() {
+        var rows = Array.prototype.slice.call(tripsEl.children);
+        rows.forEach(function (row, index) {
+          row.querySelector('.trip-number').textContent = String(index + 1).padStart(2, '0');
+        });
+        tripCounter.textContent = rows.length + ' 段';
+      }
+
+      function collectTrips(arrival) {
+        var rows = Array.prototype.slice.call(tripsEl.querySelectorAll('.trip'));
+        var ranges = [];
+        var errors = [];
+
+        rows.forEach(function (row, index) {
+          var entryValue = row.querySelector('.entry').value;
+          var exitValue = row.querySelector('.exit').value;
+          if (!entryValue && !exitValue) return;
+          if (!entryValue || !exitValue) {
+            errors.push('第 ' + (index + 1) + ' 段历史行程需要同时填写入境和离境日期。');
+            return;
+          }
+          var start = parseDate(entryValue);
+          var end = parseDate(exitValue);
+          if (end < start) {
+            errors.push('第 ' + (index + 1) + ' 段行程的离境日期早于入境日期。');
+            return;
+          }
+          if (arrival && end >= arrival) {
+            errors.push('第 ' + (index + 1) + ' 段历史行程必须在计划入境日前结束。');
+            return;
+          }
+          ranges.push({ start: start, end: end });
+        });
+
+        ranges.sort(function (a, b) { return a.start - b.start; });
+        var merged = [];
+        ranges.forEach(function (range) {
+          var last = merged[merged.length - 1];
+          if (!last || range.start.getTime() > addDays(last.end, 1).getTime()) {
+            merged.push({ start: range.start, end: range.end });
+          } else if (range.end > last.end) {
+            last.end = range.end;
+          }
+        });
+
+        return { ranges: merged, errors: errors };
+      }
+
+      function countHistoryInWindow(ranges, windowStart, windowEnd) {
+        return ranges.reduce(function (total, range) {
+          var start = range.start > windowStart ? range.start : windowStart;
+          var end = range.end < windowEnd ? range.end : windowEnd;
+          if (end < start) return total;
+          return total + dayDiff(start, end) + 1;
+        }, 0);
+      }
+
+      function renderErrors(errors) {
+        if (!errors.length) {
+          messages.textContent = '';
+          messages.classList.remove('show');
+          return;
+        }
+        messages.innerHTML = errors.map(function (error) { return '<div>' + error + '</div>'; }).join('');
+        messages.classList.add('show');
+      }
+
+      function showEmpty(message, detail) {
+        emptyState.querySelector('strong').textContent = message;
+        emptyState.querySelector('span').textContent = detail;
+        emptyState.classList.remove('hidden');
+        resultContent.classList.remove('show');
+      }
+
+      function calculate() {
+        var arrival = parseDate(arrivalInput.value);
+        var collected = collectTrips(arrival);
+        renderErrors(collected.errors);
+
+        if (!arrival) {
+          showEmpty('先选择计划入境日期', '过去没有行程也可以直接计算');
+          return;
+        }
+        if (collected.errors.length) {
+          showEmpty('请先修正日期', '修正左侧提示后会自动重新计算');
+          return;
+        }
+
+        var best = null;
+        var bestHistory = 0;
+        var bestCurrent = 0;
+
+        for (var stay = 1; stay <= 180; stay += 1) {
+          var candidate = addDays(arrival, stay - 1);
+          var windowStart = addDays(subtractCalendarMonths(candidate, 12), 1);
+          var historyDays = countHistoryInWindow(collected.ranges, windowStart, candidate);
+          var total = historyDays + stay;
+          if (total <= 180) {
+            best = candidate;
+            bestHistory = historyDays;
+            bestCurrent = stay;
+          }
+        }
+
+        emptyState.classList.add('hidden');
+        resultContent.classList.add('show');
+
+        if (!best) {
+          daysEl.textContent = '0';
+          deadlineEl.textContent = '暂不宜入境';
+          var arrivalHistory = countHistoryInWindow(collected.ranges, addDays(subtractCalendarMonths(arrival, 12), 1), arrival);
+          historyUsedEl.textContent = arrivalHistory + ' 天';
+          currentUsedEl.textContent = '0 天';
+          zeroNote.classList.add('show');
+          return;
+        }
+
+        daysEl.textContent = String(bestCurrent);
+        deadlineEl.textContent = formatDate(best);
+        historyUsedEl.textContent = bestHistory + ' 天';
+        currentUsedEl.textContent = bestCurrent + ' 天';
+        zeroNote.classList.remove('show');
+      }
+
+      addTripBtn.addEventListener('click', function () {
+        addTrip();
+        var newest = tripsEl.lastElementChild;
+        if (newest) newest.querySelector('.entry').focus();
+      });
+      arrivalInput.addEventListener('input', calculate);
+
+      addTrip();
+      calculate();
+    })();
+  </script>
+</body>
+</html>
