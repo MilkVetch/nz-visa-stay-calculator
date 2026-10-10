@@ -9,7 +9,7 @@
   <link rel="icon" href="data:," />
   <title data-i18n="docTitle">新西兰停留天数计算器</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Lora:ital,wght@1,400;1,500&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap');
 
     :root {
       color-scheme: light dark;
@@ -55,6 +55,110 @@
         --focus: #78bca8;
         --shadow: 0 22px 70px rgba(0, 0, 0, .3);
       }
+    }
+
+    /* ===== 方案二：午夜终端 (midnight terminal) ===== */
+    html[data-theme="midnight"] {
+      color-scheme: dark;
+      --bg: #090909;
+      --surface: #0e0e10;
+      --surface-strong: #17171a;
+      --ink: #f7f9fa;
+      --muted: #a3a9b0;
+      --line: rgba(247, 249, 250, .14);
+      --accent: #af50ff;
+      --accent-hover: #c47bff;
+      --accent-soft: rgba(175, 80, 255, .13);
+      --accent-ink: #d7adff;
+      --result-bg: #0b0b0d;
+      --result-ink: #f7f9fa;
+      --result-muted: #a3a9b0;
+      --danger: #ff8d80;
+      --danger-soft: rgba(255, 141, 128, .12);
+      --focus: #af50ff;
+      --shadow: none;
+    }
+
+    html[data-theme="midnight"] .intro h1 {
+      font-family: "Lora", "Noto Sans SC", serif;
+      font-style: italic;
+      font-weight: 500;
+      letter-spacing: -.015em;
+    }
+
+    html[data-theme="midnight"] h2 {
+      font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
+      font-size: .8rem;
+      font-weight: 600;
+      letter-spacing: .24em;
+      color: var(--ink);
+    }
+
+    html[data-theme="midnight"] .field-label {
+      font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
+      font-size: .7rem;
+      letter-spacing: .18em;
+      color: var(--muted);
+    }
+
+    html[data-theme="midnight"] .deadline,
+    html[data-theme="midnight"] .days {
+      font-family: "Lora", "Noto Sans SC", serif;
+      font-style: italic;
+      font-weight: 500;
+      letter-spacing: -.01em;
+    }
+
+    html[data-theme="midnight"] .input-panel {
+      background: transparent;
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    html[data-theme="midnight"] .result-panel {
+      background: var(--result-bg);
+      border: 1px solid var(--line);
+      box-shadow: 0 0 110px rgba(175, 80, 255, .10);
+    }
+
+    html[data-theme="midnight"] .result-panel::after { opacity: .10; }
+
+    html[data-theme="midnight"] .step-button {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0b0b0c;
+    }
+
+    html[data-theme="midnight"] .step-button:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    html[data-theme="midnight"] .step-button.secondary {
+      background: transparent;
+      border-color: var(--line);
+      color: var(--ink);
+    }
+
+    html[data-theme="midnight"] .step-button.secondary:hover { border-color: var(--ink); }
+
+    html[data-theme="midnight"] .mobile-title {
+      font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
+      font-size: .7rem;
+      letter-spacing: .22em;
+      color: var(--muted);
+    }
+
+    html[data-theme="midnight"] .method {
+      font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
+      font-size: .76rem;
+      letter-spacing: .04em;
+    }
+
+    html[data-theme="midnight"] body[data-mobile-step="1"] .progress-item:nth-child(1)::before,
+    html[data-theme="midnight"] body[data-mobile-step="2"] .progress-item:nth-child(2)::before,
+    html[data-theme="midnight"] body[data-mobile-step="3"] .progress-item:nth-child(3)::before {
+      color: #0b0b0c;
     }
 
     * { box-sizing: border-box; }
@@ -109,10 +213,69 @@
       outline-offset: 2px;
     }
 
-    .intro .lang-toggle {
+    .intro .top-actions {
       position: absolute;
       top: 6px;
       right: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 32px;
+      padding: 0 12px 0 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .theme-toggle:hover { color: var(--ink); border-color: var(--ink); }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+      outline-offset: 2px;
+    }
+
+    .tt-track {
+      position: relative;
+      flex: none;
+      width: 30px;
+      height: 17px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-strong);
+      transition: background .2s ease, border-color .2s ease;
+    }
+
+    .tt-dot {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform .2s ease, background .2s ease;
+    }
+
+    .theme-toggle[aria-pressed="true"] .tt-track {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .theme-toggle[aria-pressed="true"] .tt-dot {
+      transform: translateX(13px);
+      background: #0b0b0c;
     }
 
     h1 {
@@ -823,6 +986,16 @@
         background: var(--bg);
       }
 
+      .mobile-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 0 0 8px;
+      }
+
+      .mobile-title-row .mobile-title { margin: 0; }
+
       .mobile-title {
         margin: 0 0 8px;
         font-size: .82rem;
@@ -1039,17 +1212,32 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
     }
   </style>
+  <script>
+    try { if (localStorage.getItem('nzcalc-theme') === 'midnight') document.documentElement.setAttribute('data-theme', 'midnight'); } catch (e) {}
+  </script>
 </head>
 <body data-mobile-step="1">
   <main class="page">
     <header class="intro">
-      <button class="lang-toggle" id="langToggleDesktop" type="button">EN</button>
+      <div class="top-actions">
+        <button class="theme-toggle" id="themeToggleDesktop" type="button" aria-pressed="false" data-i18n-aria="themeAria">
+          <span class="tt-track" aria-hidden="true"><span class="tt-dot"></span></span>
+          <span class="tt-label" data-i18n="themeLabel">午夜</span>
+        </button>
+        <button class="lang-toggle" id="langToggleDesktop" type="button">EN</button>
+      </div>
       <h1 data-i18n-html="heading">如果这天来新西兰，<br>最多能待到哪天？</h1>
       <p data-i18n="intro">加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。</p>
     </header>
 
     <nav class="mobile-progress" aria-label="计算步骤" data-i18n-aria="stepsLabel">
-      <p class="mobile-title" data-i18n="docTitle">新西兰停留天数计算器</p>
+      <div class="mobile-title-row">
+        <p class="mobile-title" data-i18n="docTitle">新西兰停留天数计算器</p>
+        <button class="theme-toggle" id="themeToggleMobile" type="button" aria-pressed="false" data-i18n-aria="themeAria">
+          <span class="tt-track" aria-hidden="true"><span class="tt-dot"></span></span>
+          <span class="tt-label" data-i18n="themeLabel">午夜</span>
+        </button>
+      </div>
       <div class="mobile-steps">
         <span class="progress-item" data-number="1" data-i18n="step1">本次入境</span>
         <span class="progress-item" data-number="2" data-i18n="step2">过往行程</span>
@@ -1206,6 +1394,8 @@
       var I18N = {
         zh: {
           docTitle: '新西兰停留天数计算器',
+          themeLabel: '午夜',
+          themeAria: '切换午夜主题',
           heading: '如果这天来新西兰，<br>最多能待到哪天？',
           intro: '加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。',
           step1: '本次入境', step2: '过往行程', step3: '计算结果',
@@ -1274,6 +1464,8 @@
         },
         en: {
           docTitle: 'NZ Stay Days Calculator',
+          themeLabel: 'Midnight',
+          themeAria: 'Toggle midnight theme',
           heading: 'If arriving this day,<br>how long can you stay?',
           intro: 'Add your past New Zealand trips, then pick a planned entry date. The page uses a rolling 12-month window capped at 180 days for a conservative result.',
           step1: 'This entry', step2: 'Past trips', step3: 'Result',
@@ -1495,6 +1687,44 @@
 
       function toggleLanguage() {
         applyLanguage(lang === 'zh' ? 'en' : 'zh');
+      }
+
+      function currentTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'midnight' ? 'midnight' : 'default';
+      }
+
+      function syncThemeColorMeta() {
+        var mid = currentTheme() === 'midnight';
+        var meta = document.getElementById('themeColorMeta');
+        if (mid) {
+          if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('name', 'theme-color');
+            meta.setAttribute('id', 'themeColorMeta');
+            document.head.appendChild(meta);
+          }
+          meta.setAttribute('content', '#090909');
+        } else if (meta) {
+          meta.parentNode.removeChild(meta);
+        }
+      }
+
+      function applyTheme(name) {
+        if (name === 'midnight') {
+          document.documentElement.setAttribute('data-theme', 'midnight');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+        var pressed = String(name === 'midnight');
+        Array.prototype.forEach.call(document.querySelectorAll('.theme-toggle'), function (btn) {
+          btn.setAttribute('aria-pressed', pressed);
+        });
+        try { localStorage.setItem('nzcalc-theme', name); } catch (e) {}
+        syncThemeColorMeta();
+      }
+
+      function toggleTheme() {
+        applyTheme(currentTheme() === 'midnight' ? 'default' : 'midnight');
       }
 
       var beenAnswer = null;
@@ -2037,6 +2267,12 @@
 
       document.getElementById('langToggleDesktop').addEventListener('click', toggleLanguage);
       document.getElementById('langToggleMobile').addEventListener('click', toggleLanguage);
+      document.getElementById('themeToggleDesktop').addEventListener('click', toggleTheme);
+      document.getElementById('themeToggleMobile').addEventListener('click', toggleTheme);
+
+      var savedTheme = 'default';
+      try { savedTheme = localStorage.getItem('nzcalc-theme') || 'default'; } catch (e) {}
+      applyTheme(savedTheme === 'midnight' ? 'midnight' : 'default');
 
       addTrip();
       setMobileStep(1);
