@@ -1005,7 +1005,7 @@
   <main class="page">
     <header class="intro">
       <button class="lang-toggle" id="langToggleDesktop" type="button">EN</button>
-      <h1 data-i18n-html="heading">如果这天来，<br>最多待到哪天？</h1>
+      <h1 data-i18n-html="heading">如果这天来新西兰，<br>最多能待到哪天？</h1>
       <p data-i18n="intro">加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。</p>
     </header>
 
@@ -1068,7 +1068,7 @@
               <button class="pager-button" id="nextTrip" type="button" data-i18n="nextTrip">下一段 →</button>
             </div>
             <button class="add" id="addTrip" type="button" data-i18n-html="addTrip"><span aria-hidden="true">＋</span> 增加一段行程</button>
-            <p class="hint" data-i18n="oldTripHint">太早的行程不用填：12 个月窗口之外的停留不会被计入。</p>
+            <p class="hint" data-i18n="oldTripHint">注意：太早、已落在倒推 12 个月之外的行程不用填。</p>
 
             <div class="messages" id="messages" role="alert"></div>
           </div>
@@ -1124,8 +1124,9 @@
     </div>
 
     <footer class="method">
-      <p data-i18n-html="method1"><strong>计算口径：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。</p>
+      <p data-i18n-html="method1"><strong>计算方式：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。</p>
       <p data-i18n-html="method2"><strong>请注意：</strong>这是用于规划的保守估算，不替代签证条件、移民局解释或入境时作出的决定。</p>
+      <p data-i18n-html="method3"><strong>适用签证：</strong>本计算器基于新西兰多次往返旅游签（visitor visa）的停留规则。<strong>免责声明：</strong>计算结果仅供行程规划参考，不构成移民建议；一切以<a href="https://www.immigration.govt.nz/visas/visitor-visa/" target="_blank" rel="noopener">新西兰移民局官网</a>为准。如发现计算有误，欢迎联系 <a href="mailto:xxjspam@gmail.com">xxjspam@gmail.com</a>。</p>
     </footer>
   </main>
 
@@ -1150,7 +1151,7 @@
       var I18N = {
         zh: {
           docTitle: '新西兰停留天数计算器',
-          heading: '如果这天来，<br>最多待到哪天？',
+          heading: '如果这天来新西兰，<br>最多能待到哪天？',
           intro: '加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。',
           step1: '本次入境', step2: '过往行程', step3: '计算结果',
           stepsLabel: '计算步骤',
@@ -1162,7 +1163,7 @@
           toHistory: '下一步：过往行程',
           historyTitle: '以前来过新西兰吗？',
           historyNote: '逐段填写入境和离境日期。',
-          oldTripHint: '太早的行程不用填：12 个月窗口之外的停留不会被计入。',
+          oldTripHint: '注意：太早、已落在倒推 12 个月之外的行程不用填。',
           beenYes: '来过',
           beenNo: '没来过',
           tripsTitle: '请填写过往行程',
@@ -1191,8 +1192,9 @@
           zeroNote: '按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。',
           editTrips: '修改行程',
           restart: '重算入境日',
-          method1: '<strong>计算口径：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。',
+          method1: '<strong>计算方式：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。',
           method2: '<strong>请注意：</strong>这是用于规划的保守估算，不替代签证条件、移民局解释或入境时作出的决定。',
+          method3: '<strong>适用签证：</strong>本计算器基于新西兰多次往返旅游签（visitor visa）的停留规则。<strong>免责声明：</strong>计算结果仅供行程规划参考，不构成移民建议；一切以<a href="https://www.immigration.govt.nz/visas/visitor-visa/" target="_blank" rel="noopener">新西兰移民局官网</a>为准。如发现计算有误，欢迎联系 <a href="mailto:xxjspam@gmail.com">xxjspam@gmail.com</a>。',
           notAdvisable: '暂不宜入境',
           needBothDates: '历史行程需要同时填写入境和离境日期。',
           exitBeforeEntry: '行程的离境日期早于入境日期。',
@@ -1220,7 +1222,7 @@
           toHistory: 'Next: past trips',
           historyTitle: 'Been to New Zealand before?',
           historyNote: 'Enter each trip\u2019s entry and exit dates.',
-          oldTripHint: 'Skip very old trips: stays outside the 12-month window are not counted.',
+          oldTripHint: 'Note: you can skip trips that already fall outside the 12-month lookback window.',
           beenYes: 'Yes',
           beenNo: 'No',
           tripsTitle: 'Enter your past trips',
@@ -1251,6 +1253,7 @@
           restart: 'Re-pick entry date',
           method1: '<strong>Method:</strong> for each candidate exit date we look back 12 calendar months; total stay must not exceed 180 days. Overlapping past trips are merged to avoid double counting.',
           method2: '<strong>Note:</strong> this is a conservative planning estimate. It does not replace visa conditions, Immigration New Zealand’s interpretation, or decisions made at the border.',
+          method3: '<strong>Scope:</strong> this calculator is based on the New Zealand multiple-entry visitor visa stay rule. <strong>Disclaimer:</strong> results are for trip-planning reference only and are not immigration advice; the <a href="https://www.immigration.govt.nz/visas/visitor-visa/" target="_blank" rel="noopener">Immigration New Zealand website</a> prevails. If you spot a calculation error, contact <a href="mailto:xxjspam@gmail.com">xxjspam@gmail.com</a>.',
           notAdvisable: 'Entry not advisable',
           needBothDates: ': please fill in both entry and exit dates.',
           exitBeforeEntry: ': exit date is before entry date.',
