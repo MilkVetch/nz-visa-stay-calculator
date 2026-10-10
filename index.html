@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#f2f3ef" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#111412" media="(prefers-color-scheme: dark)" />
   <link rel="icon" href="data:," />
-  <title>新西兰停留天数计算器</title>
+  <title data-i18n="docTitle">新西兰停留天数计算器</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap');
 
@@ -81,11 +81,38 @@
     }
 
     .intro {
+      position: relative;
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
       gap: 36px;
       align-items: end;
       margin-bottom: 40px;
+    }
+
+    .lang-toggle {
+      min-height: 32px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-pill);
+      background: transparent;
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .lang-toggle:hover { color: var(--ink); border-color: var(--ink); }
+    .lang-toggle:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+      outline-offset: 2px;
+    }
+
+    .intro .lang-toggle {
+      position: absolute;
+      top: 6px;
+      right: 0;
     }
 
     h1 {
@@ -408,6 +435,66 @@
 
     .zero-note.show { display: block; }
 
+    .trip-breakdown {
+      display: none;
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid color-mix(in srgb, var(--result-ink) 15%, transparent);
+    }
+
+    .trip-breakdown.show { display: block; }
+
+    .breakdown-title {
+      margin: 0 0 10px;
+      color: var(--result-muted);
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .breakdown-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 9px;
+    }
+
+    .breakdown-list li {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: .86rem;
+      line-height: 1.5;
+    }
+
+    .breakdown-list .seg-dates { color: var(--result-ink); }
+
+    .breakdown-list .seg-days {
+      flex: none;
+      color: var(--result-muted);
+      font-family: "IBM Plex Mono", monospace;
+      white-space: nowrap;
+    }
+
+    .breakdown-total {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 12px 0 0;
+      padding-top: 12px;
+      border-top: 1px dashed color-mix(in srgb, var(--result-ink) 20%, transparent);
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .breakdown-total .total-days {
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--accent);
+      font-size: 1.05rem;
+    }
+
     .method {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -488,12 +575,14 @@
 
       .mobile-progress {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1fr 1fr 1fr auto;
         height: 64px;
         padding: max(10px, env(safe-area-inset-top)) 18px 8px;
         border-bottom: 1px solid var(--line);
         background: var(--bg);
       }
+
+      .mobile-progress .lang-toggle { align-self: center; }
 
       .progress-item {
         display: grid;
@@ -616,19 +705,29 @@
 
       .history-step .section-head { align-items: start; margin-bottom: 4px; }
       .history-step .counter { margin-top: 8px; }
-      .trips { display: block; margin-top: clamp(16px, 4vh, 28px); }
+      .trips { display: block; min-width: 0; max-width: 100%; margin-top: clamp(16px, 4vh, 28px); }
       .trip { display: none; }
       .trip.active-trip {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 12px 10px;
+        min-width: 0;
+        max-width: 100%;
         padding: 0;
         border: 0;
       }
       .trip-number { display: none; }
       .trip .field { grid-column: 1 / -1; }
       .trip .remove { grid-column: 2; grid-row: 3; min-height: 36px; }
-      .trip input[type="date"] { min-height: 50px; }
+      .trip input[type="date"] {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        min-height: 50px;
+        -webkit-appearance: none;
+        appearance: none;
+      }
 
       .trip-pager {
         display: flex;
@@ -672,7 +771,8 @@
 
       .result-panel::after { width: 170px; height: 170px; right: -60px; bottom: -70px; }
       .empty-state { min-height: 0; flex: 1; }
-      .result-content.show { display: flex; flex-direction: column; flex: 1; }
+      .result-content.show { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+      .trip-breakdown { margin-top: 20px; padding-top: 14px; }
       .days-line { margin-top: clamp(16px, 3.5vh, 26px); }
       .days { font-size: clamp(4.6rem, 24vw, 6.4rem); }
       .deadline-block { margin-top: clamp(24px, 5vh, 38px); padding-top: 18px; }
@@ -702,14 +802,16 @@
 <body data-mobile-step="1">
   <main class="page">
     <header class="intro">
-      <h1>如果这天来，<br>最多待到哪天？</h1>
-      <p>加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。</p>
+      <button class="lang-toggle" id="langToggleDesktop" type="button">EN</button>
+      <h1 data-i18n-html="heading">如果这天来，<br>最多待到哪天？</h1>
+      <p data-i18n="intro">加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。</p>
     </header>
 
-    <nav class="mobile-progress" aria-label="计算步骤">
-      <span class="progress-item" data-number="1">本次入境</span>
-      <span class="progress-item" data-number="2">过往行程</span>
-      <span class="progress-item" data-number="3">计算结果</span>
+    <nav class="mobile-progress" aria-label="计算步骤" data-i18n-aria="stepsLabel">
+      <span class="progress-item" data-number="1" data-i18n="step1">本次入境</span>
+      <span class="progress-item" data-number="2" data-i18n="step2">过往行程</span>
+      <span class="progress-item" data-number="3" data-i18n="step3">计算结果</span>
+      <button class="lang-toggle" id="langToggleMobile" type="button">EN</button>
     </nav>
 
     <div class="workspace">
@@ -717,20 +819,20 @@
         <div class="mobile-step arrival-step active" data-step="1">
           <div class="arrival-wrap">
             <div class="arrival-copy">
-              <h2 id="arrival-title">本次行程哪天到？</h2>
-              <p>先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
+              <h2 id="arrival-title" data-i18n="arrivalTitle">本次行程哪天到？</h2>
+              <p data-i18n="arrivalHint">先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
             </div>
             <div class="field arrival-field">
-              <label for="arrival">计划入境日期</label>
+              <label for="arrival" data-i18n="arrivalLabel">计划入境日期</label>
               <input id="arrival" type="date" autocomplete="off" />
             </div>
           </div>
           <div class="rule-explainer" aria-label="计算规则说明">
-            <strong>怎么计算？</strong>
-            <p>官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。</p>
+            <strong data-i18n="ruleTitle">怎么计算？</strong>
+            <p data-i18n="ruleText">官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。</p>
           </div>
           <div class="mobile-actions">
-            <button class="step-button" id="toHistory" type="button">下一步：过往行程</button>
+            <button class="step-button" id="toHistory" type="button" data-i18n="toHistory">下一步：过往行程</button>
           </div>
         </div>
 
@@ -739,69 +841,74 @@
         <div class="mobile-step history-step" data-step="2">
           <div class="section-head">
             <div>
-              <h2 id="history-title">以前来过新西兰吗？</h2>
-              <p class="mobile-step-note">逐段填写；如果没有，直接查看结果。</p>
+              <h2 id="history-title" data-i18n="historyTitle">以前来过新西兰吗？</h2>
+              <p class="mobile-step-note" data-i18n="historyNote">逐段填写；如果没有，直接查看结果。</p>
             </div>
             <span class="counter" id="tripCounter">1 段</span>
           </div>
 
           <div class="trips" id="trips" aria-live="polite"></div>
           <div class="trip-pager" aria-label="切换历史行程">
-            <button class="pager-button" id="prevTrip" type="button">← 上一段</button>
+            <button class="pager-button" id="prevTrip" type="button" data-i18n="prevTrip">← 上一段</button>
             <span class="pager-position" id="tripPosition">1 / 1</span>
-            <button class="pager-button" id="nextTrip" type="button">下一段 →</button>
+            <button class="pager-button" id="nextTrip" type="button" data-i18n="nextTrip">下一段 →</button>
           </div>
-          <button class="add" id="addTrip" type="button"><span aria-hidden="true">＋</span> 增加一段行程</button>
+          <button class="add" id="addTrip" type="button" data-i18n-html="addTrip"><span aria-hidden="true">＋</span> 增加一段行程</button>
 
           <div class="messages" id="messages" role="alert"></div>
           <div class="mobile-actions">
-            <button class="step-button secondary" id="backToArrival" type="button">上一步</button>
-            <button class="step-button" id="toResult" type="button">查看结果</button>
+            <button class="step-button secondary" id="backToArrival" type="button" data-i18n="back">上一步</button>
+            <button class="step-button" id="toResult" type="button" data-i18n="viewResult">查看结果</button>
           </div>
         </div>
       </section>
 
       <aside class="result-panel" aria-live="polite" aria-atomic="true">
         <div class="empty-state" id="emptyState">
-          <p class="result-label">计算结果</p>
-          <strong>先选择计划入境日期</strong>
-          <span>过去没有行程也可以直接计算</span>
+          <p class="result-label" data-i18n="resultLabel">计算结果</p>
+          <strong data-i18n="emptyTitle1">先选择计划入境日期</strong>
+          <span data-i18n="emptyDetail1">过去没有行程也可以直接计算</span>
         </div>
 
         <div class="result-content" id="resultContent">
-          <p class="result-label">本次最多还可以停留</p>
+          <p class="result-label" data-i18n="stillStay">本次最多还可以停留</p>
           <div class="days-line">
             <strong class="days" id="days">180</strong>
-            <span class="days-unit">天</span>
+            <span class="days-unit" data-i18n="dayUnit">天</span>
           </div>
 
           <div class="deadline-block">
-            <span class="deadline-label">最晚应在这天离境</span>
+            <span class="deadline-label" data-i18n="leaveBy">最晚应在这天离境</span>
             <strong class="deadline" id="deadline">—</strong>
           </div>
 
           <div class="result-meta">
             <div class="meta-item">
-              <span>历史停留计入</span>
+              <span data-i18n="historyCounted">历史停留计入</span>
               <strong id="historyUsed">0 天</strong>
             </div>
             <div class="meta-item">
-              <span>本次停留</span>
+              <span data-i18n="thisStay">本次停留</span>
               <strong id="currentUsed">180 天</strong>
             </div>
           </div>
-          <p class="zero-note" id="zeroNote">按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。</p>
+          <div class="trip-breakdown" id="tripBreakdown">
+            <p class="breakdown-title" data-i18n="breakdownTitle">历史行程明细</p>
+            <ul class="breakdown-list" id="tripBreakdownList"></ul>
+            <p class="breakdown-total"><span data-i18n="breakdownTotal">历史行程共计</span><span class="total-days" id="tripBreakdownTotal">0 天</span></p>
+          </div>
+          <p class="zero-note" id="zeroNote" data-i18n="zeroNote">按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。</p>
           <div class="mobile-actions">
-            <button class="step-button secondary" id="editHistory" type="button">修改行程</button>
-            <button class="step-button" id="startAgain" type="button">重算入境日</button>
+            <button class="step-button secondary" id="editHistory" type="button" data-i18n="editTrips">修改行程</button>
+            <button class="step-button" id="startAgain" type="button" data-i18n="restart">重算入境日</button>
           </div>
         </div>
       </aside>
     </div>
 
     <footer class="method">
-      <p><strong>计算口径：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。</p>
-      <p><strong>请注意：</strong>这是用于规划的保守估算，不替代签证条件、移民局解释或入境时作出的决定。</p>
+      <p data-i18n-html="method1"><strong>计算口径：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。</p>
+      <p data-i18n-html="method2"><strong>请注意：</strong>这是用于规划的保守估算，不替代签证条件、移民局解释或入境时作出的决定。</p>
     </footer>
   </main>
 
@@ -810,6 +917,130 @@
       'use strict';
 
       var DAY = 86400000;
+      var MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      var I18N = {
+        zh: {
+          docTitle: '新西兰停留天数计算器',
+          heading: '如果这天来，<br>最多待到哪天？',
+          intro: '加入过去的新西兰行程，再选计划入境日期。页面会按滚动 12 个月、最多 180 天，给出保守结果。',
+          step1: '本次入境', step2: '过往行程', step3: '计算结果',
+          stepsLabel: '计算步骤',
+          arrivalTitle: '本次行程哪天到？',
+          arrivalHint: '先选择计划入境日期。入境当天和离境当天都计入停留天数。',
+          arrivalLabel: '计划入境日期',
+          ruleTitle: '怎么计算？',
+          ruleText: '官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。',
+          toHistory: '下一步：过往行程',
+          historyTitle: '以前来过新西兰吗？',
+          historyNote: '逐段填写；如果没有，直接查看结果。',
+          entryDate: '入境日期',
+          exitDate: '离境日期',
+          removeTrip: '删除',
+          removeTripAria: '删除这段行程',
+          addTrip: '<span aria-hidden="true">＋</span> 增加一段行程',
+          prevTrip: '← 上一段',
+          nextTrip: '下一段 →',
+          back: '上一步',
+          viewResult: '查看结果',
+          resultLabel: '计算结果',
+          emptyTitle1: '先选择计划入境日期',
+          emptyDetail1: '过去没有行程也可以直接计算',
+          emptyTitle2: '请先修正日期',
+          emptyDetail2: '修正提示后会自动重新计算',
+          stillStay: '本次最多还可以停留',
+          dayUnit: '天',
+          leaveBy: '最晚应在这天离境',
+          historyCounted: '历史停留计入',
+          thisStay: '本次停留',
+          breakdownTitle: '历史行程明细',
+          breakdownTotal: '历史行程共计',
+          zeroNote: '按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。',
+          editTrips: '修改行程',
+          restart: '重算入境日',
+          method1: '<strong>计算口径：</strong>以每个候选离境日向前倒推 12 个日历月，总停留不超过 180 天；重叠历史行程会自动合并，避免重复计数。',
+          method2: '<strong>请注意：</strong>这是用于规划的保守估算，不替代签证条件、移民局解释或入境时作出的决定。',
+          notAdvisable: '暂不宜入境',
+          needBothDates: '历史行程需要同时填写入境和离境日期。',
+          exitBeforeEntry: '行程的离境日期早于入境日期。',
+          mustEndBeforeArrival: '历史行程必须在计划入境日前结束。',
+          pickArrivalFirst: '请先选择计划入境日期'
+        },
+        en: {
+          docTitle: 'NZ Stay Days Calculator',
+          heading: 'If arriving this day,<br>how long can you stay?',
+          intro: 'Add your past New Zealand trips, then pick a planned entry date. The page uses a rolling 12-month window capped at 180 days for a conservative result.',
+          step1: 'This entry', step2: 'Past trips', step3: 'Result',
+          stepsLabel: 'Calculation steps',
+          arrivalTitle: 'When do you arrive this time?',
+          arrivalHint: 'Pick your planned entry date first. Both the entry day and the exit day count toward your stay.',
+          arrivalLabel: 'Planned entry date',
+          ruleTitle: 'How is it calculated?',
+          ruleText: 'The official rule caps total stay at 6 months in any 12-month period; this calculator uses a conservative 180-day cap. Add your past trips next and we’ll work out how long you can stay.',
+          toHistory: 'Next: past trips',
+          historyTitle: 'Been to New Zealand before?',
+          historyNote: 'Add trips one by one; if you have none, view the result directly.',
+          entryDate: 'Entry date',
+          exitDate: 'Exit date',
+          removeTrip: 'Delete',
+          removeTripAria: 'Delete this trip',
+          addTrip: '<span aria-hidden="true">＋</span> Add a trip',
+          prevTrip: '← Previous',
+          nextTrip: 'Next →',
+          back: 'Back',
+          viewResult: 'View result',
+          resultLabel: 'Result',
+          emptyTitle1: 'Pick a planned entry date first',
+          emptyDetail1: 'You can calculate even with no past trips',
+          emptyTitle2: 'Please fix the dates first',
+          emptyDetail2: 'It will recalculate automatically once fixed',
+          stillStay: 'You can still stay up to',
+          dayUnit: 'days',
+          leaveBy: 'Leave no later than',
+          historyCounted: 'Past stays counted',
+          thisStay: 'This stay',
+          breakdownTitle: 'Past trip breakdown',
+          breakdownTotal: 'Past trips total',
+          zeroNote: 'Based on your history, the cap is already reached on your planned entry date. Consider adjusting it — visa conditions prevail.',
+          editTrips: 'Edit trips',
+          restart: 'Re-pick entry date',
+          method1: '<strong>Method:</strong> for each candidate exit date we look back 12 calendar months; total stay must not exceed 180 days. Overlapping past trips are merged to avoid double counting.',
+          method2: '<strong>Note:</strong> this is a conservative planning estimate. It does not replace visa conditions, Immigration New Zealand’s interpretation, or decisions made at the border.',
+          notAdvisable: 'Entry not advisable',
+          needBothDates: ': please fill in both entry and exit dates.',
+          exitBeforeEntry: ': exit date is before entry date.',
+          mustEndBeforeArrival: ': past trips must end before the planned entry date.',
+          pickArrivalFirst: 'Please pick a planned entry date first'
+        }
+      };
+
+      var lang = 'zh';
+      try {
+        var savedLang = localStorage.getItem('nzcalc-lang');
+        if (savedLang === 'zh' || savedLang === 'en') lang = savedLang;
+      } catch (e) { lang = 'zh'; }
+
+      function t(key) {
+        return I18N[lang][key] != null ? I18N[lang][key] : key;
+      }
+
+      function htmlLang() {
+        return lang === 'zh' ? 'zh-CN' : 'en';
+      }
+
+      function segName(index) {
+        return lang === 'zh' ? '第 ' + index + ' 段' : 'Trip ' + index;
+      }
+
+      function daysText(n) {
+        if (lang === 'zh') return n + ' 天';
+        return n === 1 ? '1 day' : n + ' days';
+      }
+
+      function countText(n) {
+        if (lang === 'zh') return n + ' 段';
+        return n === 1 ? '1 trip' : n + ' trips';
+      }
       var tripsEl = document.getElementById('trips');
       var addTripBtn = document.getElementById('addTrip');
       var arrivalInput = document.getElementById('arrival');
@@ -822,6 +1053,9 @@
       var historyUsedEl = document.getElementById('historyUsed');
       var currentUsedEl = document.getElementById('currentUsed');
       var zeroNote = document.getElementById('zeroNote');
+      var tripBreakdown = document.getElementById('tripBreakdown');
+      var tripBreakdownList = document.getElementById('tripBreakdownList');
+      var tripBreakdownTotal = document.getElementById('tripBreakdownTotal');
       var toHistoryBtn = document.getElementById('toHistory');
       var backToArrivalBtn = document.getElementById('backToArrival');
       var toResultBtn = document.getElementById('toResult');
@@ -859,7 +1093,54 @@
       }
 
       function formatDate(date) {
-        return date.getUTCFullYear() + '年' + (date.getUTCMonth() + 1) + '月' + date.getUTCDate() + '日';
+        var y = date.getUTCFullYear();
+        var m = date.getUTCMonth();
+        var d = date.getUTCDate();
+        if (lang === 'en') return d + ' ' + MONTHS_EN[m] + ' ' + y;
+        return y + '年' + (m + 1) + '月' + d + '日';
+      }
+
+      function applyLanguage(newLang, skipRecalc) {
+        lang = newLang;
+        try { localStorage.setItem('nzcalc-lang', lang); } catch (e) {}
+        var target = htmlLang();
+        document.documentElement.setAttribute('lang', target);
+        Array.prototype.forEach.call(document.querySelectorAll('input[type="date"]'), function (input) {
+          input.setAttribute('lang', target);
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'), function (el) {
+          var value = I18N[lang][el.getAttribute('data-i18n')];
+          if (value != null) el.textContent = value;
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-html]'), function (el) {
+          var value = I18N[lang][el.getAttribute('data-i18n-html')];
+          if (value != null) el.innerHTML = value;
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('[data-i18n-aria]'), function (el) {
+          var value = I18N[lang][el.getAttribute('data-i18n-aria')];
+          if (value != null) el.setAttribute('aria-label', value);
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('.lang-toggle'), function (btn) {
+          btn.textContent = lang === 'zh' ? 'EN' : '中文';
+        });
+        Array.prototype.forEach.call(tripsEl.querySelectorAll('.trip'), function (row) {
+          var entryLabel = row.querySelector('.entry-label');
+          var exitLabel = row.querySelector('.exit-label');
+          var removeBtn = row.querySelector('.remove');
+          if (entryLabel) entryLabel.textContent = t('entryDate');
+          if (exitLabel) exitLabel.textContent = t('exitDate');
+          if (removeBtn) {
+            removeBtn.textContent = t('removeTrip');
+            removeBtn.setAttribute('aria-label', t('removeTripAria'));
+          }
+        });
+        renumber();
+        updateTripPager();
+        if (!skipRecalc) calculate();
+      }
+
+      function toggleLanguage() {
+        applyLanguage(lang === 'zh' ? 'en' : 'zh');
       }
 
       function setMobileStep(step) {
@@ -887,9 +1168,9 @@
         row.dataset.id = String(rowId);
         row.innerHTML =
           '<span class="trip-number" aria-hidden="true"></span>' +
-          '<div class="field"><label for="entry-' + rowId + '">入境日期</label><input id="entry-' + rowId + '" class="entry" type="date" autocomplete="off"></div>' +
-          '<div class="field"><label for="exit-' + rowId + '">离境日期</label><input id="exit-' + rowId + '" class="exit" type="date" autocomplete="off"></div>' +
-          '<button class="remove" type="button" aria-label="删除这段行程">删除</button>';
+          '<div class="field"><label class="entry-label" for="entry-' + rowId + '">' + t('entryDate') + '</label><input id="entry-' + rowId + '" class="entry" type="date" autocomplete="off" lang="' + htmlLang() + '"></div>' +
+          '<div class="field"><label class="exit-label" for="exit-' + rowId + '">' + t('exitDate') + '</label><input id="exit-' + rowId + '" class="exit" type="date" autocomplete="off" lang="' + htmlLang() + '"></div>' +
+          '<button class="remove" type="button" aria-label="' + t('removeTripAria') + '">' + t('removeTrip') + '</button>';
 
         if (values) {
           row.querySelector('.entry').value = values.entry || '';
@@ -918,7 +1199,7 @@
         rows.forEach(function (row, index) {
           row.querySelector('.trip-number').textContent = String(index + 1).padStart(2, '0');
         });
-        tripCounter.textContent = rows.length + ' 段';
+        tripCounter.textContent = countText(rows.length);
       }
 
       function collectTrips(arrival) {
@@ -931,17 +1212,17 @@
           var exitValue = row.querySelector('.exit').value;
           if (!entryValue && !exitValue) return;
           if (!entryValue || !exitValue) {
-            errors.push('第 ' + (index + 1) + ' 段历史行程需要同时填写入境和离境日期。');
+            errors.push(segName(index + 1) + t('needBothDates'));
             return;
           }
           var start = parseDate(entryValue);
           var end = parseDate(exitValue);
           if (end < start) {
-            errors.push('第 ' + (index + 1) + ' 段行程的离境日期早于入境日期。');
+            errors.push(segName(index + 1) + t('exitBeforeEntry'));
             return;
           }
           if (arrival && end >= arrival) {
-            errors.push('第 ' + (index + 1) + ' 段历史行程必须在计划入境日前结束。');
+            errors.push(segName(index + 1) + t('mustEndBeforeArrival'));
             return;
           }
           ranges.push({ start: start, end: end });
@@ -958,7 +1239,7 @@
           }
         });
 
-        return { ranges: merged, errors: errors };
+        return { ranges: merged, raw: ranges, errors: errors };
       }
 
       function countHistoryInWindow(ranges, windowStart, windowEnd) {
@@ -980,11 +1261,30 @@
         messages.classList.add('show');
       }
 
-      function showEmpty(message, detail) {
-        emptyState.querySelector('strong').textContent = message;
-        emptyState.querySelector('span').textContent = detail;
+      function showEmpty(titleKey, detailKey) {
+        emptyState.querySelector('strong').textContent = t(titleKey);
+        emptyState.querySelector('span').textContent = t(detailKey);
         emptyState.classList.remove('hidden');
         resultContent.classList.remove('show');
+      }
+
+      function renderBreakdown(rawRanges) {
+        if (!rawRanges.length) {
+          tripBreakdown.classList.remove('show');
+          tripBreakdownList.innerHTML = '';
+          tripBreakdownTotal.textContent = daysText(0);
+          return;
+        }
+        var total = 0;
+        tripBreakdownList.innerHTML = rawRanges.map(function (range, index) {
+          var days = dayDiff(range.start, range.end) + 1;
+          total += days;
+          return '<li><span class="seg-dates">' + segName(index + 1) + '　' +
+            formatDate(range.start) + ' → ' + formatDate(range.end) +
+            '</span><span class="seg-days">' + daysText(days) + '</span></li>';
+        }).join('');
+        tripBreakdownTotal.textContent = daysText(total);
+        tripBreakdown.classList.add('show');
       }
 
       function calculate() {
@@ -993,11 +1293,13 @@
         renderErrors(collected.errors);
 
         if (!arrival) {
-          showEmpty('先选择计划入境日期', '过去没有行程也可以直接计算');
+          showEmpty('emptyTitle1', 'emptyDetail1');
+          renderBreakdown([]);
           return;
         }
         if (collected.errors.length) {
-          showEmpty('请先修正日期', '修正左侧提示后会自动重新计算');
+          showEmpty('emptyTitle2', 'emptyDetail2');
+          renderBreakdown([]);
           return;
         }
 
@@ -1022,19 +1324,21 @@
 
         if (!best) {
           daysEl.textContent = '0';
-          deadlineEl.textContent = '暂不宜入境';
+          deadlineEl.textContent = t('notAdvisable');
           var arrivalHistory = countHistoryInWindow(collected.ranges, addDays(subtractCalendarMonths(arrival, 12), 1), arrival);
-          historyUsedEl.textContent = arrivalHistory + ' 天';
-          currentUsedEl.textContent = '0 天';
+          historyUsedEl.textContent = daysText(arrivalHistory);
+          currentUsedEl.textContent = daysText(0);
           zeroNote.classList.add('show');
+          renderBreakdown(collected.raw);
           return;
         }
 
         daysEl.textContent = String(bestCurrent);
         deadlineEl.textContent = formatDate(best);
-        historyUsedEl.textContent = bestHistory + ' 天';
-        currentUsedEl.textContent = bestCurrent + ' 天';
+        historyUsedEl.textContent = daysText(bestHistory);
+        currentUsedEl.textContent = daysText(bestCurrent);
         zeroNote.classList.remove('show');
+        renderBreakdown(collected.raw);
       }
 
       addTripBtn.addEventListener('click', function () {
@@ -1055,7 +1359,7 @@
 
       toHistoryBtn.addEventListener('click', function () {
         if (!arrivalInput.value) {
-          arrivalInput.setCustomValidity('请先选择计划入境日期');
+          arrivalInput.setCustomValidity(t('pickArrivalFirst'));
           arrivalInput.reportValidity();
           arrivalInput.focus();
           return;
@@ -1095,9 +1399,12 @@
         });
       }
 
+      document.getElementById('langToggleDesktop').addEventListener('click', toggleLanguage);
+      document.getElementById('langToggleMobile').addEventListener('click', toggleLanguage);
+
       addTrip();
       setMobileStep(1);
-      calculate();
+      applyLanguage(lang);
     })();
   </script>
 </body>
