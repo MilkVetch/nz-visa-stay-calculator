@@ -732,6 +732,51 @@
 
     .picker-hint.show { display: block; }
 
+    .arrival-form {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 100%;
+    }
+
+    .arrival-form[hidden] { display: none; }
+
+    .overstay-note {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: var(--radius-control);
+      background: var(--danger-soft);
+      color: var(--danger);
+      font-size: .85rem;
+      line-height: 1.6;
+    }
+
+    .overstay-note.show { display: block; }
+
+    .arrival-head-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .arrival-head-row h2 { margin: 0; }
+
+    .link-button {
+      flex: none;
+      border: 0;
+      background: none;
+      padding: 4px 0;
+      color: var(--muted);
+      font-size: .82rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .link-button:hover { color: var(--ink); }
+
     .result-panel .step-button {
       border-color: var(--result-ink);
       background: var(--result-ink);
@@ -1019,13 +1064,25 @@
     <div class="workspace">
       <section class="input-panel" aria-labelledby="arrival-title">
         <div class="mobile-step arrival-step active" data-step="1">
+          <div class="arrival-ask" id="arrivalAsk">
+            <h2 data-i18n="inNzTitle">你现在在新西兰境内吗？</h2>
+            <div class="been-choices">
+              <button class="choice-button" id="inNzYes" type="button" aria-pressed="false" data-i18n="inNzYes">在境内</button>
+              <button class="choice-button" id="inNzNo" type="button" aria-pressed="false" data-i18n="inNzNo">不在，准备入境</button>
+            </div>
+          </div>
+
+          <div class="arrival-form" id="arrivalForm" hidden>
           <div class="arrival-wrap">
             <div class="arrival-copy">
-              <h2 id="arrival-title" data-i18n="arrivalTitle">本次行程哪天到？</h2>
-              <p data-i18n="arrivalHint">先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
+              <div class="arrival-head-row">
+                <h2 id="arrival-title">本次行程哪天到？</h2>
+                <button class="link-button" id="changeInNz" type="button" data-i18n="changeAnswer">← 重选</button>
+              </div>
+              <p id="arrivalHint">先选择计划入境日期。入境当天和离境当天都计入停留天数。</p>
             </div>
             <div class="field arrival-field">
-              <span class="field-label" id="arrivalLabel" data-i18n="arrivalLabel">计划入境日期</span>
+              <span class="field-label" id="arrivalLabel">计划入境日期</span>
               <div class="date-field" id="arrival" data-value="" role="button" tabindex="0" aria-labelledby="arrivalLabel"></div>
             </div>
           </div>
@@ -1035,6 +1092,7 @@
           </div>
           <div class="mobile-actions">
             <button class="step-button" id="toHistory" type="button" disabled data-i18n="toHistory">下一步：过往行程</button>
+          </div>
           </div>
         </div>
 
@@ -1084,7 +1142,7 @@
         </div>
 
         <div class="result-content" id="resultContent">
-          <p class="result-label" data-i18n="stillStay">本次最多还可以停留</p>
+          <p class="result-label" id="resultLabel">按最大六个月计算，本次最多还可停留</p>
           <div class="days-line">
             <strong class="days" id="days">180</strong>
             <span class="days-unit" data-i18n="dayUnit">天</span>
@@ -1101,7 +1159,7 @@
               <strong id="historyUsed">0 天</strong>
             </div>
             <div class="meta-item">
-              <span data-i18n="thisStay">本次停留</span>
+              <span id="metaStayLabel">本次停留</span>
               <strong id="currentUsed">180 天</strong>
             </div>
           </div>
@@ -1112,6 +1170,7 @@
             <p class="breakdown-note" id="breakdownNote" data-i18n="breakdownNote">删除线为 12 个月窗口之外的行程，不计入总数。</p>
           </div>
           <p class="zero-note" id="zeroNote" data-i18n="zeroNote">按所填历史记录，计划入境当天已达到或超过上限。建议调整入境日期，并以签证条件为准。</p>
+          <p class="overstay-note" id="overstayNote" data-i18n="overstayNote">注意：按此计算，你的可停留期限已过，请尽快安排离境并以签证条件为准。</p>
           <div class="mobile-actions">
             <button class="step-button secondary" id="editHistory" type="button" data-i18n="editTrips">修改行程</button>
             <button class="step-button" id="startAgain" type="button" data-i18n="restart">重算入境日</button>
@@ -1155,6 +1214,17 @@
           arrivalTitle: '本次行程哪天到？',
           arrivalHint: '先选择计划入境日期。入境当天和离境当天都计入停留天数。',
           arrivalLabel: '计划入境日期',
+          inNzTitle: '你现在在新西兰境内吗？',
+          inNzYes: '在境内',
+          inNzNo: '不在，准备入境',
+          changeAnswer: '← 重选',
+          arrivalTitleInNz: '这次哪天入境的？',
+          arrivalHintInNz: '选择你这次入境新西兰的日期。',
+          arrivalLabelInNz: '本次入境日期',
+          pickerFutureHint: '在境内时，入境日期不能是未来时间。',
+          stillStayInNz: '按最大六个月计算，还可停留',
+          alreadyStayed: '已停留',
+          overstayNote: '注意：按此计算，你的可停留期限已过，请尽快安排离境并以签证条件为准。',
           ruleTitle: '怎么计算？',
           ruleText: '官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。',
           toHistory: '下一步：过往行程',
@@ -1214,6 +1284,17 @@
           arrivalTitle: 'When do you arrive this time?',
           arrivalHint: 'Pick your planned entry date first. Both the entry day and the exit day count toward your stay.',
           arrivalLabel: 'Planned entry date',
+          inNzTitle: 'Are you currently in New Zealand?',
+          inNzYes: 'In New Zealand',
+          inNzNo: 'Not yet — planning entry',
+          changeAnswer: '← Change',
+          arrivalTitleInNz: 'When did you enter this time?',
+          arrivalHintInNz: 'Select the date you entered New Zealand this time.',
+          arrivalLabelInNz: 'This entry date',
+          pickerFutureHint: 'While in New Zealand, the entry date cannot be in the future.',
+          stillStayInNz: 'Based on the 6-month maximum, you can still stay',
+          alreadyStayed: 'Already stayed',
+          overstayNote: 'Note: this calculation shows your allowed stay has ended. Please arrange departure promptly — visa conditions prevail.',
           ruleTitle: 'How is it calculated?',
           ruleText: 'The official rule caps total stay at 6 months in any 12-month period; this calculator uses a conservative 180-day cap. Add your past trips next and we’ll work out how long you can stay.',
           toHistory: 'Next: past trips',
@@ -1394,6 +1475,9 @@
 
       function toggleLanguage() {
         applyLanguage(lang === 'zh' ? 'en' : 'zh');
+        renderArrivalMode();
+        calculate();
+        if (pickerHintKind) showPickerHint(pickerHintKind);
       }
 
       var beenAnswer = null;
@@ -1428,8 +1512,57 @@
       beenYesBtn.addEventListener('click', function () { setBeenAnswer(true); });
       beenNoBtn.addEventListener('click', function () { setBeenAnswer(false); });
 
+      var inNzAnswer = null;
+      var arrivalAsk = document.getElementById('arrivalAsk');
+      var arrivalForm = document.getElementById('arrivalForm');
+      var inNzYesBtn = document.getElementById('inNzYes');
+      var inNzNoBtn = document.getElementById('inNzNo');
+      var changeInNzBtn = document.getElementById('changeInNz');
+      var arrivalTitleEl = document.getElementById('arrival-title');
+      var arrivalHintEl = document.getElementById('arrivalHint');
+      var arrivalLabelEl = document.getElementById('arrivalLabel');
+      var resultLabelEl = document.getElementById('resultLabel');
+      var metaStayLabelEl = document.getElementById('metaStayLabel');
+      var overstayNote = document.getElementById('overstayNote');
+      var pickerHintKind = null;
+
+      function showPickerHint(kind) {
+        pickerHintKind = kind;
+        pickerHint.textContent = t(kind === 'future' ? 'pickerFutureHint' : 'pickerPastHint');
+        pickerHint.classList.add('show');
+      }
+
+      function renderArrivalMode() {
+        var inNz = inNzAnswer === true;
+        var answered = inNzAnswer !== null;
+        arrivalAsk.hidden = answered;
+        arrivalForm.hidden = !answered;
+        inNzYesBtn.setAttribute('aria-pressed', String(inNzAnswer === true));
+        inNzNoBtn.setAttribute('aria-pressed', String(inNzAnswer === false));
+        arrivalTitleEl.textContent = t(inNz ? 'arrivalTitleInNz' : 'arrivalTitle');
+        arrivalHintEl.textContent = t(inNz ? 'arrivalHintInNz' : 'arrivalHint');
+        arrivalLabelEl.textContent = t(inNz ? 'arrivalLabelInNz' : 'arrivalLabel');
+        updateToHistoryState();
+      }
+
+      function setInNzAnswer(ans) {
+        inNzAnswer = ans;
+        renderArrivalMode();
+        calculate();
+      }
+
+      inNzYesBtn.addEventListener('click', function () { setInNzAnswer(true); });
+      inNzNoBtn.addEventListener('click', function () { setInNzAnswer(false); });
+      changeInNzBtn.addEventListener('click', function () { setInNzAnswer(null); });
+
       function updateToHistoryState() {
-        toHistoryBtn.disabled = !getDateValue(arrivalField);
+        var v = getDateValue(arrivalField);
+        var ok = !!v;
+        if (ok) {
+          var today = todayLocalISO();
+          ok = inNzAnswer === true ? v <= today : v >= today;
+        }
+        toHistoryBtn.disabled = !ok;
       }
 
       function setMobileStep(step) {
@@ -1747,6 +1880,7 @@
         if (pickerCloseTimer) { clearTimeout(pickerCloseTimer); pickerCloseTimer = null; }
         pickerTarget = fieldEl;
         pickerHint.classList.remove('show');
+        pickerHintKind = null;
         var v = getDateValue(fieldEl);
         var now = new Date();
         var y = now.getFullYear();
@@ -1783,9 +1917,10 @@
         var returnTo = pickerTarget;
         if (save && pickerTarget) {
           var iso = pickerSel.y + '-' + String(pickerSel.m).padStart(2, '0') + '-' + String(pickerSel.d).padStart(2, '0');
-          if (pickerTarget === arrivalField && iso < todayLocalISO()) {
-            pickerHint.classList.add('show');
-            return;
+          if (pickerTarget === arrivalField) {
+            var todayIso = todayLocalISO();
+            if (inNzAnswer === true && iso > todayIso) { showPickerHint('future'); return; }
+            if (inNzAnswer !== true && iso < todayIso) { showPickerHint('past'); return; }
           }
           setDateValue(pickerTarget, iso);
         }
@@ -1810,7 +1945,13 @@
       });
 
       function calculate() {
-        var arrival = parseDate(getDateValue(arrivalField));
+        var inNzMode = inNzAnswer === true;
+        resultLabelEl.textContent = t(inNzMode ? 'stillStayInNz' : 'stillStay');
+        metaStayLabelEl.textContent = t(inNzMode ? 'alreadyStayed' : 'thisStay');
+        var rawArrival = getDateValue(arrivalField);
+        var today = todayLocalISO();
+        var arrivalOk = !!rawArrival && (inNzMode ? rawArrival <= today : rawArrival >= today);
+        var arrival = arrivalOk ? parseDate(rawArrival) : null;
         var collected = collectTrips(arrival);
         renderErrors(collected.errors);
 
@@ -1850,18 +1991,35 @@
           var arrivalWindowStart = addDays(subtractCalendarMonths(arrival, 12), 1);
           var arrivalHistory = countHistoryInWindow(collected.ranges, arrivalWindowStart, arrival);
           historyUsedEl.textContent = daysText(arrivalHistory);
-          currentUsedEl.textContent = daysText(0);
-          zeroNote.classList.add('show');
+          if (inNzMode) {
+            currentUsedEl.textContent = daysText(dayDiff(arrival, parseDate(todayLocalISO())) + 1);
+            zeroNote.classList.remove('show');
+            overstayNote.classList.add('show');
+          } else {
+            currentUsedEl.textContent = daysText(0);
+            zeroNote.classList.add('show');
+            overstayNote.classList.remove('show');
+          }
           renderBreakdown(collected.raw, arrivalWindowStart, arrival);
           return;
         }
 
-        daysEl.textContent = String(bestCurrent);
+        var bestWindowStart = addDays(subtractCalendarMonths(best, 12), 1);
         deadlineEl.textContent = formatDate(best);
         historyUsedEl.textContent = daysText(bestHistory);
-        currentUsedEl.textContent = daysText(bestCurrent);
         zeroNote.classList.remove('show');
-        renderBreakdown(collected.raw, addDays(subtractCalendarMonths(best, 12), 1), best);
+        if (inNzMode) {
+          var todayD = parseDate(todayLocalISO());
+          var remaining = dayDiff(todayD, best);
+          daysEl.textContent = String(Math.max(0, remaining));
+          currentUsedEl.textContent = daysText(dayDiff(arrival, todayD) + 1);
+          overstayNote.classList.toggle('show', remaining < 0);
+        } else {
+          daysEl.textContent = String(bestCurrent);
+          currentUsedEl.textContent = daysText(bestCurrent);
+          overstayNote.classList.remove('show');
+        }
+        renderBreakdown(collected.raw, bestWindowStart, best);
       }
 
       addTripBtn.addEventListener('click', function () {
@@ -1882,7 +2040,9 @@
 
       toHistoryBtn.addEventListener('click', function () {
         var v = getDateValue(arrivalField);
-        if (!v || v < todayLocalISO()) {
+        var today = todayLocalISO();
+        var valid = !!v && (inNzAnswer === true ? v <= today : v >= today);
+        if (!valid) {
           arrivalField.classList.add('field-error');
           setTimeout(function () { arrivalField.classList.remove('field-error'); }, 1600);
           openDatePicker(arrivalField);
@@ -1931,6 +2091,7 @@
       addTrip();
       setMobileStep(1);
       applyLanguage(lang);
+      renderArrivalMode();
       renderHistoryMode();
       updateToHistoryState();
     })();
