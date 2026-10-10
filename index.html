@@ -418,6 +418,39 @@
     .add:hover { background: var(--ink); color: var(--bg); }
     .add:active { transform: translateY(1px); }
 
+    .been-choices {
+      display: grid;
+      gap: 12px;
+      margin-top: clamp(18px, 4vh, 30px);
+    }
+
+    .choice-button {
+      min-height: 58px;
+      padding: 0 20px;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-control);
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: border-color .15s ease, background .15s ease;
+    }
+
+    .choice-button:hover { border-color: var(--ink); }
+
+    .choice-button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-ink);
+    }
+
+    .choice-button:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 35%, transparent);
+      outline-offset: 2px;
+    }
+
     .divider {
       height: 1px;
       margin: 30px 0;
@@ -999,23 +1032,34 @@
         <div class="divider"></div>
 
         <div class="mobile-step history-step" data-step="2">
-          <div class="section-head">
-            <div>
-              <h2 id="history-title" data-i18n="historyTitle">以前来过新西兰吗？</h2>
-              <p class="mobile-step-note" data-i18n="historyNote">逐段填写；如果没有，直接查看结果。</p>
+          <div class="history-ask" id="historyAsk">
+            <h2 data-i18n="historyTitle">以前来过新西兰吗？</h2>
+            <div class="been-choices">
+              <button class="choice-button" id="beenYes" type="button" aria-pressed="false" data-i18n="beenYes">来过</button>
+              <button class="choice-button" id="beenNo" type="button" aria-pressed="false" data-i18n="beenNo">没来过</button>
             </div>
-            <span class="counter" id="tripCounter">1 段</span>
           </div>
 
-          <div class="trips" id="trips" aria-live="polite"></div>
-          <div class="trip-pager" aria-label="切换历史行程">
-            <button class="pager-button" id="prevTrip" type="button" data-i18n="prevTrip">← 上一段</button>
-            <span class="pager-position" id="tripPosition">1 / 1</span>
-            <button class="pager-button" id="nextTrip" type="button" data-i18n="nextTrip">下一段 →</button>
-          </div>
-          <button class="add" id="addTrip" type="button" data-i18n-html="addTrip"><span aria-hidden="true">＋</span> 增加一段行程</button>
+          <div class="history-trips" id="historyTrips" hidden>
+            <div class="section-head">
+              <div>
+                <h2 data-i18n="tripsTitle">请填写过往行程</h2>
+                <p class="mobile-step-note" data-i18n="historyNote">逐段填写入境和离境日期。</p>
+              </div>
+              <span class="counter" id="tripCounter">1 段</span>
+            </div>
 
-          <div class="messages" id="messages" role="alert"></div>
+            <div class="trips" id="trips" aria-live="polite"></div>
+            <div class="trip-pager" aria-label="切换历史行程" data-i18n-aria="tripPagerLabel">
+              <button class="pager-button" id="prevTrip" type="button" data-i18n="prevTrip">← 上一段</button>
+              <span class="pager-position" id="tripPosition">1 / 1</span>
+              <button class="pager-button" id="nextTrip" type="button" data-i18n="nextTrip">下一段 →</button>
+            </div>
+            <button class="add" id="addTrip" type="button" data-i18n-html="addTrip"><span aria-hidden="true">＋</span> 增加一段行程</button>
+
+            <div class="messages" id="messages" role="alert"></div>
+          </div>
+
           <div class="mobile-actions">
             <button class="step-button secondary" id="backToArrival" type="button" data-i18n="back">上一步</button>
             <button class="step-button" id="toResult" type="button" data-i18n="viewResult">查看结果</button>
@@ -1104,7 +1148,11 @@
           ruleText: '官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。',
           toHistory: '下一步：过往行程',
           historyTitle: '以前来过新西兰吗？',
-          historyNote: '逐段填写；如果没有，直接查看结果。',
+          historyNote: '逐段填写入境和离境日期。',
+          beenYes: '来过',
+          beenNo: '没来过',
+          tripsTitle: '请填写过往行程',
+          tripPagerLabel: '切换历史行程',
           entryDate: '入境日期',
           exitDate: '离境日期',
           removeTrip: '删除',
@@ -1157,7 +1205,11 @@
           ruleText: 'The official rule caps total stay at 6 months in any 12-month period; this calculator uses a conservative 180-day cap. Add your past trips next and we’ll work out how long you can stay.',
           toHistory: 'Next: past trips',
           historyTitle: 'Been to New Zealand before?',
-          historyNote: 'Add trips one by one; if you have none, view the result directly.',
+          historyNote: 'Enter each trip\u2019s entry and exit dates.',
+          beenYes: 'Yes',
+          beenNo: 'No',
+          tripsTitle: 'Enter your past trips',
+          tripPagerLabel: 'Switch between past trips',
           entryDate: 'Entry date',
           exitDate: 'Exit date',
           removeTrip: 'Delete',
@@ -1327,6 +1379,38 @@
       function toggleLanguage() {
         applyLanguage(lang === 'zh' ? 'en' : 'zh');
       }
+
+      var beenAnswer = null;
+      var historyAsk = document.getElementById('historyAsk');
+      var historyTrips = document.getElementById('historyTrips');
+      var beenYesBtn = document.getElementById('beenYes');
+      var beenNoBtn = document.getElementById('beenNo');
+
+      function resetTrips() {
+        tripsEl.innerHTML = '';
+        currentTripIndex = 0;
+        addTrip();
+      }
+
+      function renderHistoryMode() {
+        var showTrips = beenAnswer === true;
+        historyAsk.hidden = showTrips;
+        historyTrips.hidden = !showTrips;
+        beenYesBtn.setAttribute('aria-pressed', String(showTrips));
+        beenNoBtn.setAttribute('aria-pressed', String(beenAnswer === false));
+        toResultBtn.style.display = showTrips ? '' : 'none';
+      }
+
+      function setBeenAnswer(answer) {
+        beenAnswer = answer;
+        if (answer === false) resetTrips();
+        renderHistoryMode();
+        calculate();
+        if (answer === false) setMobileStep(3);
+      }
+
+      beenYesBtn.addEventListener('click', function () { setBeenAnswer(true); });
+      beenNoBtn.addEventListener('click', function () { setBeenAnswer(false); });
 
       function setMobileStep(step) {
         document.body.setAttribute('data-mobile-step', String(step));
@@ -1765,11 +1849,16 @@
           return;
         }
         calculate();
+        renderHistoryMode();
         setMobileStep(2);
       });
 
       backToArrivalBtn.addEventListener('click', function () {
-        setMobileStep(1);
+        if (beenAnswer === true) {
+          setBeenAnswer(null);
+        } else {
+          setMobileStep(1);
+        }
       });
 
       toResultBtn.addEventListener('click', function () {
@@ -1779,6 +1868,7 @@
       });
 
       editHistoryBtn.addEventListener('click', function () {
+        renderHistoryMode();
         setMobileStep(2);
       });
 
@@ -1801,6 +1891,7 @@
       addTrip();
       setMobileStep(1);
       applyLanguage(lang);
+      renderHistoryMode();
     })();
   </script>
 </body>
