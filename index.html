@@ -666,6 +666,18 @@
       white-space: nowrap;
     }
 
+    .breakdown-list li.excluded { opacity: .55; }
+
+    .breakdown-list li.excluded .seg-dates,
+    .breakdown-list li.excluded .seg-days { text-decoration: line-through; }
+
+    .hint {
+      margin: 10px 0 0;
+      font-size: .82rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
     .breakdown-total {
       display: flex;
       align-items: baseline;
@@ -1056,6 +1068,7 @@
               <button class="pager-button" id="nextTrip" type="button" data-i18n="nextTrip">下一段 →</button>
             </div>
             <button class="add" id="addTrip" type="button" data-i18n-html="addTrip"><span aria-hidden="true">＋</span> 增加一段行程</button>
+            <p class="hint" data-i18n="oldTripHint">太早的行程不用填：12 个月窗口之外的停留不会被计入。</p>
 
             <div class="messages" id="messages" role="alert"></div>
           </div>
@@ -1149,6 +1162,7 @@
           toHistory: '下一步：过往行程',
           historyTitle: '以前来过新西兰吗？',
           historyNote: '逐段填写入境和离境日期。',
+          oldTripHint: '太早的行程不用填：12 个月窗口之外的停留不会被计入。',
           beenYes: '来过',
           beenNo: '没来过',
           tripsTitle: '请填写过往行程',
@@ -1206,6 +1220,7 @@
           toHistory: 'Next: past trips',
           historyTitle: 'Been to New Zealand before?',
           historyNote: 'Enter each trip\u2019s entry and exit dates.',
+          oldTripHint: 'Skip very old trips: stays outside the 12-month window are not counted.',
           beenYes: 'Yes',
           beenNo: 'No',
           tripsTitle: 'Enter your past trips',
@@ -1272,6 +1287,15 @@
       function daysText(n) {
         if (lang === 'zh') return n + ' 天';
         return n === 1 ? '1 day' : n + ' days';
+      }
+
+      function countedText(n) {
+        if (lang === 'zh') return '计入 ' + daysText(n);
+        return daysText(n) + ' counted';
+      }
+
+      function excludedText() {
+        return lang === 'zh' ? '不计入' : 'not counted';
       }
 
       function countText(n) {
@@ -1539,22 +1563,31 @@
         resultContent.classList.remove('show');
       }
 
-      function renderBreakdown(rawRanges) {
+      function renderBreakdown(rawRanges, windowStart, windowEnd, countedTotal) {
         if (!rawRanges.length) {
           tripBreakdown.classList.remove('show');
           tripBreakdownList.innerHTML = '';
           tripBreakdownTotal.textContent = daysText(0);
           return;
         }
-        var total = 0;
         tripBreakdownList.innerHTML = rawRanges.map(function (range, index) {
-          var days = dayDiff(range.start, range.end) + 1;
-          total += days;
-          return '<li><span class="seg-dates">' + segName(index + 1) + '　' +
-            formatDate(range.start) + ' → ' + formatDate(range.end) +
-            '</span><span class="seg-days">' + daysText(days) + '</span></li>';
+          var totalDays = dayDiff(range.start, range.end) + 1;
+          var counted = 0;
+          if (windowStart && windowEnd) {
+            var start = range.start > windowStart ? range.start : windowStart;
+            var end = range.end < windowEnd ? range.end : windowEnd;
+            if (end >= start) counted = dayDiff(start, end) + 1;
+          }
+          var datesHtml = '<span class="seg-dates">' + segName(index + 1) + '　' +
+            formatDate(range.start) + ' → ' + formatDate(range.end) + '</span>';
+          if (counted > 0) {
+            return '<li>' + datesHtml +
+              '<span class="seg-days">' + countedText(counted) + '</span></li>';
+          }
+          return '<li class="excluded">' + datesHtml +
+            '<span class="seg-days">' + daysText(totalDays) + ' · ' + excludedText() + '</span></li>';
         }).join('');
-        tripBreakdownTotal.textContent = daysText(total);
+        tripBreakdownTotal.textContent = daysText(countedTotal != null ? countedTotal : 0);
         tripBreakdown.classList.add('show');
       }
 
@@ -1809,11 +1842,12 @@
         if (!best) {
           daysEl.textContent = '0';
           deadlineEl.textContent = t('notAdvisable');
-          var arrivalHistory = countHistoryInWindow(collected.ranges, addDays(subtractCalendarMonths(arrival, 12), 1), arrival);
+          var arrivalWindowStart = addDays(subtractCalendarMonths(arrival, 12), 1);
+          var arrivalHistory = countHistoryInWindow(collected.ranges, arrivalWindowStart, arrival);
           historyUsedEl.textContent = daysText(arrivalHistory);
           currentUsedEl.textContent = daysText(0);
           zeroNote.classList.add('show');
-          renderBreakdown(collected.raw);
+          renderBreakdown(collected.raw, arrivalWindowStart, arrival, arrivalHistory);
           return;
         }
 
@@ -1822,7 +1856,8 @@
         historyUsedEl.textContent = daysText(bestHistory);
         currentUsedEl.textContent = daysText(bestCurrent);
         zeroNote.classList.remove('show');
-        renderBreakdown(collected.raw);
+        var finalWindowStart = addDays(subtractCalendarMonths(best, 12), 1);
+        renderBreakdown(collected.raw, finalWindowStart, best, bestHistory);
       }
 
       addTripBtn.addEventListener('click', function () {
