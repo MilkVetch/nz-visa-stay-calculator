@@ -716,6 +716,11 @@
       color: var(--ink);
     }
 
+    .step-button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
     .result-panel .step-button {
       border-color: var(--result-ink);
       background: var(--result-ink);
@@ -1018,7 +1023,7 @@
             <p data-i18n="ruleText">官方规则为任意 12 个月内累计最多停留 6 个月；本计算器按保守的 180 天上限估算。下一步填写过往行程，我们会算出还能待多久。</p>
           </div>
           <div class="mobile-actions">
-            <button class="step-button" id="toHistory" type="button" data-i18n="toHistory">下一步：过往行程</button>
+            <button class="step-button" id="toHistory" type="button" disabled data-i18n="toHistory">下一步：过往行程</button>
           </div>
         </div>
 
@@ -1408,6 +1413,10 @@
 
       beenYesBtn.addEventListener('click', function () { setBeenAnswer(true); });
       beenNoBtn.addEventListener('click', function () { setBeenAnswer(false); });
+
+      function updateToHistoryState() {
+        toHistoryBtn.disabled = !getDateValue(arrivalField);
+      }
 
       function setMobileStep(step) {
         document.body.setAttribute('data-mobile-step', String(step));
@@ -1880,7 +1889,7 @@
         openDatePicker(arrivalField);
       });
 
-      initDateField(arrivalField, function () { calculate(); });
+      initDateField(arrivalField, function () { calculate(); updateToHistoryState(); });
 
       if (mobileQuery.addEventListener) {
         mobileQuery.addEventListener('change', function (event) {
@@ -1895,6 +1904,7 @@
       setMobileStep(1);
       applyLanguage(lang);
       renderHistoryMode();
+      updateToHistoryState();
     })();
   </script>
 </body>
