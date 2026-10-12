@@ -220,6 +220,46 @@
     }
 
     .date-field .date-placeholder { color: var(--muted); }
+
+    .months-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      min-height: 46px;
+      padding: 6px 6px 6px 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-control);
+      background: var(--bg);
+    }
+
+    .months-row select {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      color: var(--ink);
+      font-family: "IBM Plex Mono", "Noto Sans SC", monospace;
+      font-size: .95rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* 原生下拉选项列表不继承页面配色，显式指定，避免深色模式下白底白字 */
+    .months-row select option {
+      background-color: var(--surface);
+      color: var(--ink);
+    }
+
+    .cap-note {
+      margin: 10px 0 0;
+      font-size: .82rem;
+      line-height: 1.6;
+      color: var(--result-muted);
+    }
+
     .date-field .date-value { color: var(--ink); }
 
     .date-field .date-icon {
@@ -732,6 +772,13 @@
 
     .picker-hint.show { display: block; }
 
+    .hint {
+      margin: 10px 0 0;
+      font-size: .82rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
     .arrival-form {
       display: flex;
       flex-direction: column;
@@ -1085,6 +1132,21 @@
               <span class="field-label" id="arrivalLabel">计划入境日期</span>
               <div class="date-field" id="arrival" data-value="" role="button" tabindex="0" aria-labelledby="arrivalLabel"></div>
             </div>
+            <div class="field months-field">
+              <span class="field-label" id="perEntryLabel" data-i18n="perEntryLabel">单次最长停留</span>
+              <div class="months-row">
+                <select id="perEntryMonths" aria-labelledby="perEntryLabel">
+                  <option value="" data-i18n="perEntryNone">不填</option>
+                  <option value="1" data-i18n="month1">1 个月</option>
+                  <option value="2" data-i18n="month2">2 个月</option>
+                  <option value="3" data-i18n="month3">3 个月</option>
+                  <option value="4" data-i18n="month4">4 个月</option>
+                  <option value="5" data-i18n="month5">5 个月</option>
+                  <option value="6" data-i18n="month6">6 个月</option>
+                </select>
+              </div>
+              <p class="hint" data-i18n="perEntryHint">按你的签证条件选择；不填则只按 12 个月规则计算。</p>
+            </div>
           </div>
           <div class="rule-explainer" aria-label="计算规则说明">
             <strong data-i18n="ruleTitle">怎么计算？</strong>
@@ -1123,6 +1185,7 @@
               <button class="pager-button" id="nextTrip" type="button" data-i18n="nextTrip">下一段 →</button>
             </div>
             <button class="add" id="addTrip" type="button" data-i18n-html="addTrip"><span aria-hidden="true">＋</span> 增加一段行程</button>
+            <p class="hint" data-i18n="oldTripHint">太早的行程不用填：12 个月窗口之外的停留不会被计入。</p>
 
             <div class="messages" id="messages" role="alert"></div>
           </div>
@@ -1152,6 +1215,7 @@
             <span class="deadline-label" data-i18n="leaveBy">最晚应在这天离境</span>
             <strong class="deadline" id="deadline">—</strong>
           </div>
+          <p class="cap-note" id="capNote" hidden></p>
 
           <div class="result-meta">
             <div class="meta-item">
@@ -1214,6 +1278,15 @@
           arrivalTitle: '本次行程哪天到？',
           arrivalHint: '先选择计划入境日期。入境当天和离境当天都计入停留天数。',
           arrivalLabel: '计划入境日期',
+          perEntryLabel: '单次最长停留',
+          perEntryNone: '不填',
+          month1: '1 个月',
+          month2: '2 个月',
+          month3: '3 个月',
+          month4: '4 个月',
+          month5: '5 个月',
+          month6: '6 个月',
+          perEntryHint: '按你的签证条件选择；不填则只按 12 个月规则计算。',
           inNzTitle: '你现在在新西兰境内吗？',
           inNzYes: '在境内',
           inNzNo: '不在，准备入境',
@@ -1234,6 +1307,7 @@
           beenNo: '没来过',
           tripsTitle: '请填写过往行程',
           tripPagerLabel: '切换历史行程',
+          oldTripHint: '太早的行程不用填：12 个月窗口之外的停留不会被计入。',
           entryDate: '入境日期',
           exitDate: '离境日期',
           removeTrip: '删除',
@@ -1284,6 +1358,15 @@
           arrivalTitle: 'When do you arrive this time?',
           arrivalHint: 'Pick your planned entry date first. Both the entry day and the exit day count toward your stay.',
           arrivalLabel: 'Planned entry date',
+          perEntryLabel: 'Max stay per visit',
+          perEntryNone: 'Not set',
+          month1: '1 month',
+          month2: '2 months',
+          month3: '3 months',
+          month4: '4 months',
+          month5: '5 months',
+          month6: '6 months',
+          perEntryHint: 'Select per your visa conditions; leave blank to use only the 12-month rule.',
           inNzTitle: 'Are you currently in New Zealand?',
           inNzYes: 'In New Zealand',
           inNzNo: 'Not yet — planning entry',
@@ -1304,6 +1387,7 @@
           beenNo: 'No',
           tripsTitle: 'Enter your past trips',
           tripPagerLabel: 'Switch between past trips',
+          oldTripHint: 'Skip very old trips: stays outside the 12-month window are not counted.',
           entryDate: 'Entry date',
           exitDate: 'Exit date',
           removeTrip: 'Delete',
@@ -1370,6 +1454,15 @@
         return n === 1 ? '1 day' : n + ' days';
       }
 
+      function countedText(n) {
+        if (lang === 'zh') return '计入 ' + daysText(n);
+        return daysText(n) + ' counted';
+      }
+
+      function excludedText() {
+        return lang === 'zh' ? '不计入' : 'not counted';
+      }
+
       function countText(n) {
         if (lang === 'zh') return n + ' 段';
         return n === 1 ? '1 trip' : n + ' trips';
@@ -1390,6 +1483,8 @@
       var tripBreakdownList = document.getElementById('tripBreakdownList');
       var tripBreakdownTotal = document.getElementById('tripBreakdownTotal');
       var breakdownNote = document.getElementById('breakdownNote');
+      var perEntryMonthsEl = document.getElementById('perEntryMonths');
+      var capNote = document.getElementById('capNote');
       var toHistoryBtn = document.getElementById('toHistory');
       var backToArrivalBtn = document.getElementById('backToArrival');
       var toResultBtn = document.getElementById('toResult');
@@ -1424,6 +1519,21 @@
         targetMonth = ((targetMonth % 12) + 12) % 12;
         var lastDay = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate();
         return new Date(Date.UTC(targetYear, targetMonth, Math.min(date.getUTCDate(), lastDay)));
+      }
+
+      function addCalendarMonths(date, amount) {
+        return subtractCalendarMonths(date, -amount);
+      }
+
+      function readPerEntryMonths() {
+        var v = parseInt(perEntryMonthsEl.value, 10);
+        if (!isFinite(v) || v < 1 || v > 6) return null;
+        return v;
+      }
+
+      function capNoteText(n) {
+        if (lang === 'zh') return '本次结果受单次停留上限限制（' + n + ' 个月）';
+        return 'Limited by the single-visit cap (' + n + ' months)';
       }
 
       function formatDate(date) {
@@ -1692,7 +1802,7 @@
         resultContent.classList.remove('show');
       }
 
-      function renderBreakdown(rawRanges, windowStart, windowEnd) {
+      function renderBreakdown(rawRanges, windowStart, windowEnd, countedTotal) {
         if (!rawRanges.length) {
           tripBreakdown.classList.remove('show');
           tripBreakdownList.innerHTML = '';
@@ -1700,18 +1810,26 @@
           breakdownNote.classList.remove('show');
           return;
         }
-        var total = 0;
         var anyStruck = false;
         tripBreakdownList.innerHTML = rawRanges.map(function (range, index) {
-          var counted = countHistoryInWindow([range], windowStart, windowEnd);
-          var struck = counted === 0;
-          var shownDays = struck ? dayDiff(range.start, range.end) + 1 : counted;
-          if (struck) { anyStruck = true; } else { total += counted; }
-          return '<li class="' + (struck ? 'struck' : '') + '"><span class="seg-dates">' + segName(index + 1) + '　' +
-            formatDate(range.start) + ' → ' + formatDate(range.end) +
-            '</span><span class="seg-days">' + daysText(shownDays) + '</span></li>';
+          var totalDays = dayDiff(range.start, range.end) + 1;
+          var counted = 0;
+          if (windowStart && windowEnd) {
+            var start = range.start > windowStart ? range.start : windowStart;
+            var end = range.end < windowEnd ? range.end : windowEnd;
+            if (end >= start) counted = dayDiff(start, end) + 1;
+          }
+          var datesHtml = '<span class="seg-dates">' + segName(index + 1) + '　' +
+            formatDate(range.start) + ' → ' + formatDate(range.end) + '</span>';
+          if (counted > 0) {
+            return '<li>' + datesHtml +
+              '<span class="seg-days">' + countedText(counted) + '</span></li>';
+          }
+          anyStruck = true;
+          return '<li class="struck">' + datesHtml +
+            '<span class="seg-days">' + daysText(totalDays) + ' · ' + excludedText() + '</span></li>';
         }).join('');
-        tripBreakdownTotal.textContent = daysText(total);
+        tripBreakdownTotal.textContent = daysText(countedTotal != null ? countedTotal : 0);
         tripBreakdown.classList.add('show');
         breakdownNote.classList.toggle('show', anyStruck);
       }
@@ -1958,11 +2076,13 @@
         if (!arrival) {
           showEmpty('emptyTitle1', 'emptyDetail1');
           renderBreakdown([]);
+          capNote.hidden = true;
           return;
         }
         if (collected.errors.length) {
           showEmpty('emptyTitle2', 'emptyDetail2');
           renderBreakdown([]);
+          capNote.hidden = true;
           return;
         }
 
@@ -2000,26 +2120,45 @@
             zeroNote.classList.add('show');
             overstayNote.classList.remove('show');
           }
-          renderBreakdown(collected.raw, arrivalWindowStart, arrival);
+          renderBreakdown(collected.raw, arrivalWindowStart, arrival, arrivalHistory);
+          capNote.hidden = true;
           return;
         }
 
-        var bestWindowStart = addDays(subtractCalendarMonths(best, 12), 1);
-        deadlineEl.textContent = formatDate(best);
-        historyUsedEl.textContent = daysText(bestHistory);
+        var perEntryMonths = readPerEntryMonths();
+        var depart = best;
+        var cappedByEntry = false;
+        if (perEntryMonths) {
+          var entryDeadline = addCalendarMonths(arrival, perEntryMonths);
+          if (entryDeadline < depart) {
+            depart = entryDeadline;
+            cappedByEntry = true;
+          }
+        }
+        var finalStay = dayDiff(arrival, depart) + 1;
+        var finalWindowStart = addDays(subtractCalendarMonths(depart, 12), 1);
+        var finalHistory = countHistoryInWindow(collected.ranges, finalWindowStart, depart);
+        deadlineEl.textContent = formatDate(depart);
+        historyUsedEl.textContent = daysText(finalHistory);
         zeroNote.classList.remove('show');
         if (inNzMode) {
           var todayD = parseDate(todayLocalISO());
-          var remaining = dayDiff(todayD, best);
+          var remaining = dayDiff(todayD, depart);
           daysEl.textContent = String(Math.max(0, remaining));
           currentUsedEl.textContent = daysText(dayDiff(arrival, todayD) + 1);
           overstayNote.classList.toggle('show', remaining < 0);
         } else {
-          daysEl.textContent = String(bestCurrent);
-          currentUsedEl.textContent = daysText(bestCurrent);
+          daysEl.textContent = String(finalStay);
+          currentUsedEl.textContent = daysText(finalStay);
           overstayNote.classList.remove('show');
         }
-        renderBreakdown(collected.raw, bestWindowStart, best);
+        if (cappedByEntry) {
+          capNote.textContent = capNoteText(perEntryMonths);
+          capNote.hidden = false;
+        } else {
+          capNote.hidden = true;
+        }
+        renderBreakdown(collected.raw, finalWindowStart, depart, finalHistory);
       }
 
       addTripBtn.addEventListener('click', function () {
@@ -2078,6 +2217,7 @@
       });
 
       initDateField(arrivalField, function () { calculate(); updateToHistoryState(); });
+      perEntryMonthsEl.addEventListener('change', function () { calculate(); });
 
       if (mobileQuery.addEventListener) {
         mobileQuery.addEventListener('change', function (event) {
